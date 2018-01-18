@@ -1,14 +1,28 @@
 <template>
     <div id="app">
-        <h1>Main window</h1>
+        <component :is="mainComponent"></component>
     </div>
 </template>
 
 <script>
+  import Overview from './Overview';
+  import Connected from './Connected';
+
   export default {
     name: 'app',
     data() {
-      return {};
+      return {
+        userId: null,
+        lobbyId: null,
+        mainComponent: null,
+      };
+    },
+    beforeCreate() {
+
+    },
+    components: {
+      Overview,
+      Connected,
     },
   };
 </script>
