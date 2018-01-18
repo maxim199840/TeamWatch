@@ -4,6 +4,9 @@
   "version": "0.0.2",
   "icons": {
   },
+  "permissions": [
+    "storage"
+  ],
   "browser_action": {
     "default_title": "Team Watch",
     "default_popup": "popup.html"

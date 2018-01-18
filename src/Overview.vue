@@ -1,8 +1,13 @@
 <template>
     <div>
-        <label>User id:<input type="text" v-model.lazy.number="userId"/></label>
-        <label>Lobby id:<input type="text" v-model.lazy.number="lobbyId"/></label>
-        <button @click="connectToLobby">Connect</button>
+        <button @click="$emit('logout')">Logout</button>
+        <br>
+        <label>
+            Lobby id:
+            <input type="text" v-model.lazy="lobbyId"/>
+        </label>
+        <br>
+        <button @click="$emit('connect',lobbyId)">Connect</button>
     </div>
 </template>
 
@@ -10,12 +15,9 @@
   export default {
     name: 'overview',
     data() {
-      return {};
-    },
-    methods: {
-      connectToLobby() {
-        alert('Connected!');
-      },
+      return {
+        lobbyId: null,
+      };
     },
   };
 </script>
