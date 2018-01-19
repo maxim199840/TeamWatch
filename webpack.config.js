@@ -3,11 +3,11 @@ let webpack = require('webpack');
 let UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
-  entry: './src',
+  entry: {bundle: './src', eventPages: './src/eventPage.js', youTubeController: './src/youTubeController.js'},
   output: {
     path: path.resolve(__dirname, './build'),
     publicPath: '/build/',
-    filename: 'bundle.js',
+    filename: '[name].js',
   },
   module: {
     rules: [

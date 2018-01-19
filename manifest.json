@@ -2,6 +2,10 @@
   "name": "Team Watch",
   "manifest_version": 2,
   "version": "0.0.2",
+  "background": {
+    "scripts": ["build/eventPages.js"],
+    "persistent": false
+  },
   "icons": {
   },
   "browser_action": {
@@ -9,5 +13,9 @@
     "default_popup": "popup.html"
   },
   "content_scripts": [
+  ],
+  "permissions": [
+    "tabs",
+    "https://www.youtube.com/*"
   ]
 }
