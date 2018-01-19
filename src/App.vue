@@ -10,6 +10,7 @@
   import Authorization from './Authorization';
   import Overview from './Overview';
   import Connected from './Connected';
+  import storageController from './StorageController';
 
   export default {
     name: 'app',
@@ -28,8 +29,8 @@
       },
     },
     created() {
-      this.loadFromStorage('userId');
-      this.loadFromStorage('lobbyId');
+      getAsyncStorage(['userId', 'lobbyId']).
+          then(data => [this.userId, this.lobbyId] = [data.userId, data.lobbyId]);
     },
     components: {
       Authorization,
