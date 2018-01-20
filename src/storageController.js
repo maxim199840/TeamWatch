@@ -1,7 +1,7 @@
 class StorageController {
   getAsyncStorage(keys) {
     return new Promise((resolve, reject) => {
-      chrome.storage.local.get(keys, data => {
+      chrome.storage.sync.get(keys, data => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         }
@@ -12,13 +12,21 @@ class StorageController {
 
   setAsyncStorage(data) {
     return new Promise((resolve, reject) => {
-      chrome.storage.local.set(data, () => {
+      chrome.storage.sync.set(data, () => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         }
         resolve();
       });
     });
+  }
+
+  set onChange(callback) {
+    if (callback === null) {
+      chrome.storage.onChanged.removeListener(this.callback);
+    }
+    this.callback = callback;
+    chrome.storage.onChanged.addListener(callback);
   }
 }
 

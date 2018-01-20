@@ -1,8 +1,14 @@
 <template>
     <div id="app">
-        <authorization v-if="userId===null" @login="login"></authorization>
-        <overview v-else-if="lobbyId===null" @logout="logout" @connect="connect"></overview>
-        <connected v-else @disconnect="disconnect"></connected>
+        <template v-if="userId===null">
+            <authorization @login="login"/>
+        </template>
+        <template v-else-if="lobbyId===null">
+            <overview @logout="logout" @connect="connect"/>
+        </template>
+        <template v-else>
+            <connected @disconnect="disconnect"/>
+        </template>
     </div>
 </template>
 
@@ -10,7 +16,9 @@
   import Authorization from './Authorization';
   import Overview from './Overview';
   import Connected from './Connected';
-  import storageController from './StorageController';
+  import {storageController} from './storageController';
+
+  storageController.onchange = () => {};
 
   export default {
     name: 'app',
@@ -21,16 +29,16 @@
       };
     },
     watch: {
-      userId() {
-        this.saveToStorage('userId');
+      userId(value) {
+        storageController.setAsyncStorage({userId: value});
       },
-      lobbyId() {
-        this.saveToStorage('lobbyId');
+      lobbyId(value) {
+        storageController.setAsyncStorage({lobbyId: value});
       },
     },
     created() {
-      getAsyncStorage(['userId', 'lobbyId']).
-          then(data => [this.userId, this.lobbyId] = [data.userId, data.lobbyId]);
+      storageController.getAsyncStorage(['userId', 'lobbyId']).
+          then(data => Object.assign(this, data));
     },
     components: {
       Authorization,
@@ -38,12 +46,6 @@
       Connected,
     },
     methods: {
-      loadFromStorage(key) {
-        chrome.storage.local.get(key, data => this[key] = data[key]);
-      },
-      saveToStorage(key) {
-        chrome.storage.local.set({[key]: this[key]});
-      },
       login(userId) {
         this.userId = userId;
       },
