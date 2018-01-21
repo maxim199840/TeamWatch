@@ -1,33 +1,32 @@
-/*import firebase from 'firebase';
-import {injectYoutubeControl} from './youTubeController';
-//import * as vuefire from 'vuefire';
-let config = {
-  apiKey: 'AIzaSyBHR8HiWc-ffevxEqVwrIfuiJjkvlEf_Ew',
-  authDomain: 'teamwatch-d4d79.firebaseapp.com',
-  databaseURL: 'https://teamwatch-d4d79.firebaseio.com',
-  projectId: 'teamwatch-d4d79',
-  storageBucket: 'teamwatch-d4d79.appspot.com',
-  messagingSenderId: '420571941064',
-};
-firebase.initializeApp(config);
+import {db} from './firebaseConfig';
+import {storageController} from './storageController';
+let connectedLobby = null;
+let executed = false;
+storageController.setAsyncStorage({executed: false});
+executeScriptToYoutube();
 
-let db = firebase.database();
-let lobbiesRef = db.ref('lobbies');
-let lobbies = null;
-lobbiesRef.on('value', function(data) {
-  lobbies = data.val();
-  console.log(lobbies);
-  let tab = [];
-  let videoPage = null;
-  chrome.tabs.query({'url': lobbies[0].link/!*, 'active': true, 'lastFocusedWindow': true*!/}, (tabs => {
-    console.log(tabs);
-    if(tabs.length!==0){
-      chrome.tabs.executeScript(tabs[0].id, {file:'./build/youTubeController.js'});
-    }
-  }));
-});*/
+function executeScriptToYoutube() {
+  storageController.getAsyncStorage('lobbyId').then(data => {
+    console.log(data.lobbyId);
+    let connectedLobbyRef = db.ref(`lobbies/${data.lobbyId}`);
+    storageController.setAsyncStorage({connectedLobbyRef: `lobbies/${data.lobbyId}/`});
+    connectedLobbyRef.on('value', function(data) {
+      storageController.getAsyncStorage('executed').then(data => {executed = data.executed});
+      connectedLobby = data.val();
+      console.log(connectedLobby);
+      chrome.tabs.query({'url': connectedLobby.link}, (tabs => {
+        console.log(tabs);
+        if (tabs.length !== 0&&!executed) {
+          storageController.setAsyncStorage({executed: true});
+          chrome.tabs.executeScript(tabs[0].id,
+              {file: './build/youTubeController.js'});
+        }
+      }));
+    });
+  });
+}
 
-chrome.tabs.query(
+/*chrome.tabs.query(
     {'url': 'https://www.youtube.com/watch?annotation_id=annotation_778644711&feature=iv&src_vid=cXiZngLlCGI&v=1cyr4b9uK6o'},
     (tabs => {
       console.log(tabs);
@@ -35,7 +34,7 @@ chrome.tabs.query(
         chrome.tabs.executeScript(tabs[0].id,
             {file: './build/youTubeController.js'});
       }
-    }));
+    }));*/
 /*chrome.tabs.query({},
     function(tabs) {
       tabs.map(item => item = item.url);
