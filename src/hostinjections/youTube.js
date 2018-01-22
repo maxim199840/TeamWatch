@@ -1,5 +1,6 @@
-import {db}  from  './firebaseConfig';
-import {storageController} from './storageController';
+import {db} from '../firbaseController';
+import {storageController} from '../chrome/storageController';
+
 let video = document.getElementsByClassName('video-stream html5-main-video')[0];
 console.log(document.body);
 console.log(video);
@@ -9,8 +10,8 @@ storageController.getAsyncStorage('connectedLobbyRef').then(data => {
   let connectedLobbyRef = db.ref(data.connectedLobbyRef);
   connectedLobbyRef.child('isPlaying').on('value', data => {
     console.log(data.val());
-    if(data.val() === true) video.play();
-    else if(data.val() === false) video.pause();
+    if (data.val() === true) video.play();
+    else if (data.val() === false) video.pause();
   });
   video.onplay = function(event) {
     connectedLobbyRef.child('isPlaying').set(true);

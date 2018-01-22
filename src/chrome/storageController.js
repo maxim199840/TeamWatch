@@ -1,4 +1,12 @@
 class StorageController {
+  set onChange(callback) {
+    if (callback === null) {
+      chrome.storage.onChanged.removeListener(this.callback);
+    }
+    this.callback = callback;
+    chrome.storage.onChanged.addListener(callback);
+  }
+
   getAsyncStorage(keys) {
     return new Promise((resolve, reject) => {
       chrome.storage.sync.get(keys, data => {
@@ -20,14 +28,9 @@ class StorageController {
       });
     });
   }
-
-  set onChange(callback) {
-    if (callback === null) {
-      chrome.storage.onChanged.removeListener(this.callback);
-    }
-    this.callback = callback;
-    chrome.storage.onChanged.addListener(callback);
-  }
 }
 
+export {
+  StorageController,
+};
 export let storageController = new StorageController();

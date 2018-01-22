@@ -4,11 +4,9 @@
   "version": "0.0.2",
   "background": {
     "scripts": [
-      "build/eventPages.js"
+      "eventPage.js"
     ],
     "persistent": false
-  },
-  "icons": {
   },
   "permissions": [
     "storage",
@@ -18,7 +16,5 @@
   "browser_action": {
     "default_title": "Team Watch",
     "default_popup": "popup.html"
-  },
-  "content_scripts": [
-  ]
+  }
 }

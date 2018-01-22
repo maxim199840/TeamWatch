@@ -16,7 +16,7 @@
   import Authorization from './Authorization';
   import Overview from './Overview';
   import Connected from './Connected';
-  import {storageController} from './storageController';
+  import {storageController} from './chrome/storageController';
 
   storageController.onchange = () => {};
 

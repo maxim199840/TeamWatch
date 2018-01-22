@@ -1,5 +1,6 @@
-import {db} from './firebaseConfig';
+import {db} from '../firbaseController';
 import {storageController} from './storageController';
+
 let connectedLobby = null;
 let executed = false;
 storageController.setAsyncStorage({executed: false});
@@ -9,17 +10,19 @@ function executeScriptToYoutube() {
   storageController.getAsyncStorage('lobbyId').then(data => {
     console.log(data.lobbyId);
     let connectedLobbyRef = db.ref(`lobbies/${data.lobbyId}`);
-    storageController.setAsyncStorage({connectedLobbyRef: `lobbies/${data.lobbyId}/`});
+    storageController.
+        setAsyncStorage({connectedLobbyRef: `lobbies/${data.lobbyId}/`});
     connectedLobbyRef.on('value', function(data) {
-      storageController.getAsyncStorage('executed').then(data => {executed = data.executed});
+      storageController.getAsyncStorage('executed').
+          then(data => {executed = data.executed;});
       connectedLobby = data.val();
       console.log(connectedLobby);
       chrome.tabs.query({'url': connectedLobby.link}, (tabs => {
         console.log(tabs);
-        if (tabs.length !== 0&&!executed) {
+        if (tabs.length !== 0 && !executed) {
           storageController.setAsyncStorage({executed: true});
           chrome.tabs.executeScript(tabs[0].id,
-              {file: './build/youTubeController.js'});
+              {file: './build/youTube.js'});
         }
       }));
     });
@@ -32,7 +35,7 @@ function executeScriptToYoutube() {
       console.log(tabs);
       if (tabs.length !== 0) {
         chrome.tabs.executeScript(tabs[0].id,
-            {file: './build/youTubeController.js'});
+            {file: './build/youTube.js'});
       }
     }));*/
 /*chrome.tabs.query({},
