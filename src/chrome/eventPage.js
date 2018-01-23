@@ -1,5 +1,5 @@
-import {db} from '../firbaseController';
 import {storageController} from './storageController';
+import {db} from '../firbaseController';
 
 let connectedLobby = null;
 let executed = false;
@@ -14,7 +14,9 @@ function executeScriptToYoutube() {
         setAsyncStorage({connectedLobbyRef: `lobbies/${data.lobbyId}/`});
     connectedLobbyRef.on('value', function(data) {
       storageController.getAsyncStorage('executed').
-          then(data => {executed = data.executed;});
+          then(data => {
+            executed = data.executed;
+          });
       connectedLobby = data.val();
       console.log(connectedLobby);
       chrome.tabs.query({'url': connectedLobby.link}, (tabs => {
@@ -22,12 +24,16 @@ function executeScriptToYoutube() {
         if (tabs.length !== 0 && !executed) {
           storageController.setAsyncStorage({executed: true});
           chrome.tabs.executeScript(tabs[0].id,
-              {file: './build/youTube.js'});
+              {file: './youTube.js'});
         }
       }));
     });
   });
 }
+
+chrome.tabs.onUpdate(function(tabId, changeObj, newTab) {
+
+})
 
 /*chrome.tabs.query(
     {'url': 'https://www.youtube.com/watch?annotation_id=annotation_778644711&feature=iv&src_vid=cXiZngLlCGI&v=1cyr4b9uK6o'},
