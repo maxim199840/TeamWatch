@@ -16,5 +16,15 @@
   "browser_action": {
     "default_title": "Team Watch",
     "default_popup": "popup.html"
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "youTube.js"
+      ]
+    }
+  ]
 }

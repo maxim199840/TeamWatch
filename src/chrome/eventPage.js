@@ -1,7 +1,7 @@
 import {storageController} from './storageController';
 import {db} from '../firbaseController';
 
-let connectedLobby = null;
+let connectedLobby = {};
 let executed = false;
 storageController.setAsyncStorage({executed: false});
 executeScriptToYoutube();
@@ -12,40 +12,40 @@ function executeScriptToYoutube() {
     let connectedLobbyRef = db.ref(`lobbies/${data.lobbyId}`);
     storageController.
         setAsyncStorage({connectedLobbyRef: `lobbies/${data.lobbyId}/`});
-    connectedLobbyRef.on('value', function(data) {
+    connectedLobbyRef.child('/link').on('value', function(data) {
       storageController.getAsyncStorage('executed').
           then(data => {
             executed = data.executed;
           });
-      connectedLobby = data.val();
+      connectedLobby.link = data.val();
       console.log(connectedLobby);
-      chrome.tabs.query({'url': connectedLobby.link}, (tabs => {
+      chrome.tabs.query({}, (tabs => {
         console.log(tabs);
-        if (tabs.length !== 0 && !executed) {
-          storageController.setAsyncStorage({executed: true});
-          chrome.tabs.executeScript(tabs[0].id,
-              {file: './youTube.js'});
-        }
+        tabs.map(tab => {
+          if (checkURL(tab)&& !executed) {
+            console.log('inject');
+            storageController.setAsyncStorage({executed: true});
+            chrome.tabs.executeScript(tabs[0].id,
+                {file: './youTube.js'});
+          }
+        });
       }));
     });
   });
 }
 
-chrome.tabs.onUpdate(function(tabId, changeObj, newTab) {
+function checkURL(tab) {
+  let url = new URL(tab.url);
+  return ((url.hostname === connectedLobby.link.domain) &&
+      (url.searchParams.get('v') === connectedLobby.link.id));
+}
 
-})
-
-/*chrome.tabs.query(
-    {'url': 'https://www.youtube.com/watch?annotation_id=annotation_778644711&feature=iv&src_vid=cXiZngLlCGI&v=1cyr4b9uK6o'},
-    (tabs => {
-      console.log(tabs);
-      if (tabs.length !== 0) {
-        chrome.tabs.executeScript(tabs[0].id,
-            {file: './build/youTube.js'});
-      }
-    }));*/
-/*chrome.tabs.query({},
-    function(tabs) {
-      tabs.map(item => item = item.url);
-      if (tabs.length !== 0) console.log(tabs);
-    });*/
+chrome.tabs.onUpdated.addListener(function(tabId, changeObj, updatedTab) {
+  console.log(changeObj);
+  if (changeObj.status === 'complete') {
+    if (checkURL(updatedTab)) {
+      chrome.tabs.executeScript(tabId,
+          {file: './youTube.js'});
+    }
+  }
+});
