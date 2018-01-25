@@ -1,11 +1,12 @@
 import {browser} from '../browserApi';
 
 // browser.storage.sync.clear();
-browser.storage.sync.set({lobbyId: 0});
+browser.storage.sync.set({lobbyId: "0", link: {}});
 
 browser.runtime.onConnect.addListener(port => {
   console.log('Port connected:', port);
   port.onMessage.addListener(message => console.log(message));
+  port.postMessage({type: 'PRINYAL', payload: {}});
 });
 
 // let connectedLobbyRef = {};

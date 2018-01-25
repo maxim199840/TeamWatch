@@ -1,16 +1,17 @@
 import {browser} from '../browserApi';
+import {LINK_WITH_LOBBY} from '../messageTypes';
 
 let port;
 
-browser.storage.sync.get('lobbyId', ({lobby: lobbyId}) => {
-  onLobbyIdChange(lobbyId);
-  browser.storage.onChanged.addListener(({lobby: lobbyId}) => {
-        if (lobbyId) onLobbyIdChange(lobbyId.newValue);
+browser.storage.sync.get('lobbyId', ({lobbyId}) => {
+  onLobbyChange(lobbyId);
+  browser.storage.onChanged.addListener(({lobbyId}) => {
+        if (lobbyId) onLobbyChange(lobbyId.newValue);
       },
   );
 });
 
-function onLobbyIdChange(lobbyId) {
+function onLobbyChange(lobbyId) {
   if (port) {
     port.disconnect();
     port = null;
@@ -20,7 +21,7 @@ function onLobbyIdChange(lobbyId) {
       port = browser.runtime.connect({name: 'Tab'});
       port.onMessage.addListener(onNewMessage);
       port.postMessage({
-        type: 'Sync Me Pls With Lobby',
+        type: LINK_WITH_LOBBY,
         payload: {lobbyId},
       });
     }
@@ -28,7 +29,7 @@ function onLobbyIdChange(lobbyId) {
 }
 
 function onNewMessage(message) {
-
+  console.log(message);
 }
 
 // function lobbyListener(message) {
