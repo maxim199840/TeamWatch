@@ -1,6 +1,6 @@
 import firebase from 'firebase';
 
-let config = {
+const config = {
   apiKey: 'AIzaSyBHR8HiWc-ffevxEqVwrIfuiJjkvlEf_Ew',
   authDomain: 'teamwatch-d4d79.firebaseapp.com',
   databaseURL: 'https://teamwatch-d4d79.firebaseio.com',
@@ -8,11 +8,8 @@ let config = {
   storageBucket: 'teamwatch-d4d79.appspot.com',
   messagingSenderId: '420571941064',
 };
-
 firebase.initializeApp(config);
 
-export {
-  firebase,
-};
-export let db = firebase.database();
-export let auth = firebase.auth();
+export {firebase};
+export const db = firebase.database();
+export const auth = firebase.auth();

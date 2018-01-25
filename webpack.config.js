@@ -1,57 +1,58 @@
-const path = require(`path`);
-const webpack = require(`webpack`);
-const CopyWebpackPlugin = require(`copy-webpack-plugin`);
-const UglifyJsPlugin = require(`uglifyjs-webpack-plugin`);
+const path = require('path');
+const webpack = require('webpack');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 const env = process.env;
 
 module.exports = {
   entry: {
-    popup: `./src`,
-    eventPage: `./src/${env.PLATFORM}/eventPage`,
-    youTube: `./src/hostinjections/youTube`,
+    popup: './src/popup',
+    eventPage: './src/scripts/eventPage',
+    injection: './src/scripts/injection',
   },
   output: {
-    path: path.resolve(__dirname, `./build/${env.PLATFORM}/${env.NODE_ENV}`),
-    filename: `[name].js`,
+    path: path.resolve(__dirname, `./build/${env.NODE_ENV}`),
+    filename: '[name].js',
   },
   module: {
     rules: [
       {
         test: /\.vue$/,
-        loader: `vue-loader`,
+        loader: 'vue-loader',
         options: {
           preLoaders: {
-            html: `html-minify-loader`,
+            html: 'html-minify-loader',
           },
           preserveWhitespace: false,
         },
       },
       {
         test: /\.js$/,
-        loader: `babel-loader`,
+        loader: 'babel-loader',
         exclude: /node_modules/,
       },
       {
         test: /\.(png|jpg|gif|svg)$/,
-        loader: `file-loader`,
+        loader: 'file-loader',
         options: {
-          name: `[name].[ext]?[hash]`,
+          name: '[name].[ext]?[hash]',
         },
       },
     ],
   },
   resolve: {
     alias: {
-      vue$: `vue/dist/vue.runtime.esm.js`,
+      vue$: 'vue/dist/vue.runtime.esm.js',
     },
-    extensions: [`*`, `.js`, `.vue`],
+    extensions: ['*', '.js', '.vue'],
   },
   plugins: [
-    new webpack.EnvironmentPlugin(['NODE_ENV']),
+    new webpack.EnvironmentPlugin([
+      'NODE_ENV',
+    ]),
     new CopyWebpackPlugin([
-      `./src/assets`,
-      `./src/${env.PLATFORM}/manifest.json`,
+      './src/assets',
     ]),
   ],
   performance: {
@@ -60,16 +61,16 @@ module.exports = {
 };
 
 switch (env.NODE_ENV) {
-  case `development`: {
+  case 'development': {
     module.exports.devServer = {
       historyApiFallback: true,
       noInfo: true,
       overlay: true,
     };
-    module.exports.devtool = `#source-map`;
+    module.exports.devtool = '#source-map';
     break;
   }
-  case `production`: {
+  case 'production': {
     module.exports.plugins = module.exports.plugins.concat([
       new UglifyJsPlugin({
         uglifyOptions: {

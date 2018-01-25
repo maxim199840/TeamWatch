@@ -1,12 +1,11 @@
 {
   "name": "team-watch",
-  "version": "0.1.0",
   "author": "maxim199840 <maxim-berezovskiy@mail.ru>",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "cross-env PLATFORM=chrome NODE_ENV=development webpack --hide-modules --watch",
-    "build": "cross-env PLATFORM=chrome NODE_ENV=production webpack --progress --hide-modules"
+    "dev": "cross-env NODE_ENV=development webpack --hide-modules --watch",
+    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "dependencies": {
     "babel-core": "^6.26.0",

@@ -1,7 +1,7 @@
 {
   "name": "Team Watch",
   "manifest_version": 2,
-  "version": "0.0.2",
+  "version": "0.3.0",
   "background": {
     "scripts": [
       "eventPage.js"
@@ -23,7 +23,7 @@
         "https://www.youtube.com/*"
       ],
       "js": [
-        "youTube.js"
+        "injection.js"
       ]
     }
   ]

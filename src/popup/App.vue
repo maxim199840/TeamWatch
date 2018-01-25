@@ -16,9 +16,6 @@
   import Authorization from './Authorization';
   import Overview from './Overview';
   import Connected from './Connected';
-  import {storageController} from './chrome/storageController';
-
-  storageController.onchange = () => {};
 
   export default {
     name: 'app',
@@ -27,18 +24,6 @@
         userId: null,
         lobbyId: null,
       };
-    },
-    watch: {
-      userId(value) {
-        storageController.setAsyncStorage({userId: value});
-      },
-      lobbyId(value) {
-        storageController.setAsyncStorage({lobbyId: value});
-      },
-    },
-    created() {
-      storageController.getAsyncStorage(['userId', 'lobbyId']).
-          then(data => Object.assign(this, data));
     },
     components: {
       Authorization,
