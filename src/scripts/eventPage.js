@@ -1,7 +1,7 @@
 import {browser} from '../browserApi';
 
 // browser.storage.sync.clear();
-browser.storage.sync.set({lobbyId: "0", link: {}});
+browser.storage.sync.set({lobbyId: "a", link: {}});
 
 browser.runtime.onConnect.addListener(port => {
   console.log('Port connected:', port);
