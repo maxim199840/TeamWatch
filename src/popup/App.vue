@@ -1,13 +1,10 @@
 <template>
     <div id="app">
-        <template v-if="userId===null">
+        <template v-if="!isAuthorized">
             <authorization @login="login"/>
         </template>
-        <template v-else-if="lobbyId===null">
-            <overview @logout="logout" @connect="connect"/>
-        </template>
         <template v-else>
-            <connected @disconnect="disconnect"/>
+            <overview v-bind="{lobbiesHistory}" @logout="logout" @connect="connect"/>
         </template>
     </div>
 </template>
@@ -15,33 +12,41 @@
 <script>
   import Authorization from './Authorization';
   import Overview from './Overview';
-  import Connected from './Connected';
+  import {browser} from '../browserApi';
+  import {CONNECT_TO_LOBBY} from '../messageTypes';
 
   export default {
     name: 'app',
     data() {
       return {
-        userId: null,
-        lobbyId: null,
+        user: null,
+        lobbiesHistory: null,
       };
     },
     components: {
       Authorization,
       Overview,
-      Connected,
+    },
+    computed: {
+      isAuthorized() {
+        return this.user;
+      },
+    },
+    mounted() {
+      browser.storage.sync.get(['user', 'lobbiesHistory'], ({user, lobbiesHistory}) => {
+        this.user = user;
+        this.lobbiesHistory = lobbiesHistory;
+      });
     },
     methods: {
-      login(userId) {
-        this.userId = userId;
+      login(user) {
+        this.user = user;
       },
       logout() {
-        this.userId = null;
+        this.user = null;
       },
       connect(lobbyId) {
-        this.lobbyId = lobbyId;
-      },
-      disconnect() {
-        this.lobbyId = null;
+        browser.runtime.sendMessage({type: CONNECT_TO_LOBBY, payload: {lobbyId}});
       },
     },
   };

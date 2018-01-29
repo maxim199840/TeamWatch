@@ -5,7 +5,7 @@
             <input type="text" v-model="userId"/>
         </label>
         <br>
-        <button @click="$emit('login',userId)">Login</button>
+        <button @click="loginClick">Login</button>
     </div>
 </template>
 
@@ -16,6 +16,11 @@
       return {
         userId: null,
       };
+    },
+    methods: {
+      loginClick({target: {value}}) {
+        this.$emit('login', {userId: value});
+      },
     },
   };
 </script>

@@ -1,23 +1,18 @@
 <template>
     <div>
         <button @click="$emit('logout')">Logout</button>
-        <br>
-        <label>
-            Lobby id:
-            <input type="text" v-model.lazy="lobbyId"/>
-        </label>
-        <br>
-        <button @click="$emit('connect',lobbyId)">Connect</button>
+        <div v-for="(lobbyDetails,lobbyId) in lobbiesHistory">
+            <h3>
+                {{lobbyDetails.name}}
+                <button @click="$emit('connect',lobbyId)">Connect</button>
+            </h3>
+        </div>
     </div>
 </template>
 
 <script>
   export default {
     name: 'overview',
-    data() {
-      return {
-        lobbyId: null,
-      };
-    },
+    props: ['lobbiesHistory'],
   };
 </script>

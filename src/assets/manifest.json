@@ -13,6 +13,7 @@
     "tabs",
     "https://www.youtube.com/*"
   ],
+  "content_security_policy": "script-src https://*.firebaseio.com; object-src",
   "browser_action": {
     "default_title": "Team Watch",
     "default_popup": "popup.html"
