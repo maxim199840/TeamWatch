@@ -1,12 +1,45 @@
 import {browser} from '../browserApi';
+import {db} from '../firebaseController';
+import {LINK_WITH_LOBBY, VIDEO_CONTROL} from '../messageTypes';
 
-// browser.storage.sync.clear();
-browser.storage.sync.set({lobbyId: "a", link: {}});
+browser.storage.sync.set({lobbyId: 'lobbyId1', link: {}});
 
 browser.runtime.onConnect.addListener(port => {
-  console.log('Port connected:', port);
-  port.onMessage.addListener(message => console.log(message));
-  port.postMessage({type: 'PRINYAL', payload: {}});
+  port.onMessage.addListener(message => {
+    switch (message.type) {
+      case LINK_WITH_LOBBY: {
+        db.ref(`videoControllers/${message.payload.lobbyId}/isPlaying`).
+            on('value', isPlaying => {
+              if (isPlaying.val() === true) port.postMessage({
+                type: VIDEO_CONTROL,
+                payload: {isPlaying: isPlaying.val()},
+              });
+            });
+        db.ref(`videoControllers/${message.payload.lobbyId}/time`).
+            on('value', time => {
+              port.postMessage({
+                type: VIDEO_CONTROL,
+                payload: {time: time.val()},
+              });
+            });
+        break;
+      }
+      case VIDEO_CONTROL: {
+        if (message.payload.isPlaying) {
+          db.ref(`videoControllers/${message.payload.lobbyId}/`).
+              update({isPlaying: message.payload.isPlaying, updateTime: Date.now()});
+        }
+        if(message.payload.time) db.ref(`videoControllers/${message.payload.lobbyId}/`).
+            update({time: message.payload.time, updateTime: Date.now()});
+        break;
+      }
+    }
+  });
+
+  port.onDisconnect(port =>{
+
+  })
+
 });
 
 // let connectedLobbyRef = {};
