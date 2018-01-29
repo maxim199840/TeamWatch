@@ -37,6 +37,10 @@
         this.user = user;
         this.lobbiesHistory = lobbiesHistory;
       });
+      browser.storage.onChanged.addListener(({user, lobbiesHistory}) => {
+        this.user = user ? user.newValue : null;
+        this.lobbiesHistory = lobbiesHistory ? lobbiesHistory.newValue : null;
+      });
     },
     methods: {
       login(user) {
@@ -46,7 +50,12 @@
         this.user = null;
       },
       connect(lobbyId) {
-        browser.runtime.sendMessage({type: CONNECT_TO_LOBBY, payload: {lobbyId}});
+        browser.runtime.sendMessage({
+          type: CONNECT_TO_LOBBY,
+          payload: {
+            lobbyId,
+          },
+        });
       },
     },
   };
