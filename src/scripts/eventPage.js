@@ -1,20 +1,15 @@
 import {browser} from '../browserApi';
 import {db} from '../firebaseController';
-import {LINK_WITH_LOBBY, VIDEO_CONTROL} from '../messageTypes';
+import {
+  LINK_WITH_LOBBY,
+  VIDEO_CONTROL,
+  CONNECT_TO_LOBBY,
+} from '../messageTypes';
 
-browser.storage.sync.set(
-    {
-      lobbiesHistory: [
-        {
-          lobbyId: 'lobbyId1',
-          video: {hostname: 'www.youtube.com', v: 'dAmFRrvSeZU'},
-        },
-        {
-          lobbyId: 'lobbyId2',
-          video: {hostname: 'www.youtube.com', v: 'dAmFRrvSeZU'},
-        },
-      ],
-    });
+db.ref(`users/userId1/lobbies`).once('value').then(lobbiesHistory => {
+  console.log(lobbiesHistory.val());
+  browser.storage.sync.set({lobbiesHistory: lobbiesHistory.val()});
+});
 
 browser.runtime.onConnect.addListener(port => {
   port.onDisconnect.addListener(() => {
@@ -22,7 +17,17 @@ browser.runtime.onConnect.addListener(port => {
         once('value').
         then(numOfUsers => {
           if (numOfUsers.val() === 1) {
-
+            db.ref(`videoControllers/${message.payload.lobbyId}/`).
+                once('value').
+                then(lobbyInfo => {
+                  db.ref(`videoControllers/${message.payload.lobbyId}/`).
+                      update({
+                        time: lobbyInfo.val().time +
+                        (Date.now() - lobbyInfo.val().updateTime),
+                        updateTime: Date.now(),
+                        isPlaying: false,
+                      });
+                });
           }
           db.ref(`videoControllers/${message.payload.lobbyId}/numOfUsers`).
               update(numOfUsers.val() - 1);
@@ -34,16 +39,18 @@ browser.runtime.onConnect.addListener(port => {
         db.ref(`videoControllers/${message.payload.lobbyId}/numOfUsers`).
             once('value').
             then(numOfUsers => {
+              let currentIsPlaying;
               db.ref(`videoControllers/${message.payload.lobbyId}/isPlaying`).
-                  on('value', lobbyInfo => {
+                  on('value', isPlaying => {
+                    currentIsPlaying = isPlaying.val();
                     port.postMessage({
                       type: VIDEO_CONTROL,
-                      payload: {isPlaying: lobbyInfo.val().value},
+                      payload: {isPlaying: currentIsPlaying},
                     });
                   });
               db.ref(`videoControllers/${message.payload.lobbyId}/time`).
                   on('value', time => {
-                    if (numOfUsers.val() === 0) {
+                    if (numOfUsers.val() === 0 && !currentIsPlaying) {
                       port.postMessage({
                         type: VIDEO_CONTROL,
                         payload: {time: time.val()},
@@ -75,6 +82,28 @@ browser.runtime.onConnect.addListener(port => {
       }
     }
   });
+});
+
+/*browser.storage.sync.set({
+  lobbiesHistory: {
+    lobbyId0: {
+      name: 'KEK Show',
+      videoIdentity: {},
+    },
+  },
+});*/
+
+browser.runtime.onMessage.addListener(message => {
+  if (message.type === CONNECT_TO_LOBBY) {
+    db.ref(`videos/${message.payload.lobbyId}`).
+        once('value').
+        then(videoIdentity => {
+          browser.storage.sync.get('lobbiesHistory', objWithHistory => {
+            objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity = videoIdentity.val();
+            browser.storage.sync.set(objWithHistory);
+          });
+        });
+  }
 });
 
 // let connectedLobbyRef = {};
