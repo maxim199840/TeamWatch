@@ -24,8 +24,6 @@ import {LINK_WITH_LOBBY, VIDEO_CONTROL} from '../messageTypes';
     videoIdentity = payload.videoIdentity;
     lobbyId = payload.lobbyId;
 
-    console.log(videoIdentity, lobbyId);
-
     video = document.getElementsByClassName('video-stream html5-main-video')[0];
 
     const port = browser.runtime.connect();
