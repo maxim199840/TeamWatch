@@ -14,6 +14,10 @@ db.ref(`users/userId1/lobbies`).once('value').then(lobbiesHistory => {
 browser.runtime.onConnect.addListener(port => {
   let currentLobbyId = null;
   port.onDisconnect.addListener(() => {
+    browser.storage.sync.get('lobbiesHistory', objWithHistory => {
+      objWithHistory.lobbiesHistory[currentLobbyId].sync = false;
+      browser.storage.sync.set(objWithHistory);
+    });
     db.ref(`videoControllers/${currentLobbyId}/numOfUsers`).
         once('value').
         then(numOfUsers => {
@@ -37,6 +41,10 @@ browser.runtime.onConnect.addListener(port => {
   port.onMessage.addListener(message => {
     switch (message.type) {
       case LINK_WITH_LOBBY: {
+        browser.storage.sync.get('lobbiesHistory', objWithHistory => {
+          objWithHistory.lobbiesHistory[message.payload.lobbyId].sync = true;
+          browser.storage.sync.set(objWithHistory);
+        });
         currentLobbyId = message.payload.lobbyId;
         db.ref(`videoControllers/${message.payload.lobbyId}/numOfUsers`).
             once('value').
