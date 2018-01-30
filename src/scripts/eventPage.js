@@ -3,7 +3,7 @@ import {db} from '../firebaseController';
 import {
   LINK_WITH_LOBBY,
   VIDEO_CONTROL,
-  CONNECT_TO_LOBBY,
+  CONNECT_TO_LOBBY, DISCONNECT_FROM_LOBBY,
 } from '../messageTypes';
 
 db.ref(`users/userId1/lobbies`).once('value').then(lobbiesHistory => {
@@ -28,7 +28,7 @@ browser.runtime.onConnect.addListener(port => {
                   db.ref(`videoControllers/${currentLobbyId}/`).
                       update({
                         time: lobbyInfo.val().time +
-                        ((Date.now() - lobbyInfo.val().updateTime)/1000),
+                        ((Date.now() - lobbyInfo.val().updateTime) / 1000),
                         updateTime: Date.now(),
                         isPlaying: false,
                       });
@@ -95,15 +95,25 @@ browser.runtime.onConnect.addListener(port => {
 });
 
 browser.runtime.onMessage.addListener(message => {
-  if (message.type === CONNECT_TO_LOBBY) {
-    db.ref(`videos/${message.payload.lobbyId}`).
-        once('value').
-        then(videoIdentity => {
-          browser.storage.sync.get('lobbiesHistory', objWithHistory => {
-            objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity = videoIdentity.val();
-            browser.storage.sync.set(objWithHistory);
+  switch (message.type) {
+    case CONNECT_TO_LOBBY: {
+      db.ref(`videos/${message.payload.lobbyId}`).
+          once('value').
+          then(videoIdentity => {
+            browser.storage.sync.get('lobbiesHistory', objWithHistory => {
+              objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity = videoIdentity.val();
+              browser.storage.sync.set(objWithHistory);
+            });
           });
-        });
+      break;
+    }
+    case DISCONNECT_FROM_LOBBY: {
+      browser.storage.sync.get('lobbiesHistory', objWithHistory => {
+        objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity = undefined;
+        browser.storage.sync.set(objWithHistory);
+      });
+      break;
+    }
   }
 });
 
