@@ -102,6 +102,7 @@ browser.runtime.onMessage.addListener(message => {
           then(videoIdentity => {
             browser.storage.sync.get('lobbiesHistory', objWithHistory => {
               objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity = videoIdentity.val();
+              objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity.link = generateLink(videoIdentity.val());
               browser.storage.sync.set(objWithHistory);
             });
           });
@@ -116,6 +117,16 @@ browser.runtime.onMessage.addListener(message => {
     }
   }
 });
+
+function generateLink(videoIdentity){
+  let url = "";
+  switch(videoIdentity.hostname){
+    case "www.youtube.com":{
+      url += videoIdentity.hostname + '/watch?v=' + videoIdentity.v;
+    }
+  }
+  return url;
+}
 
 // let connectedLobbyRef = {};
 // lobbyMessenger.addListener(message => console.log(message));
