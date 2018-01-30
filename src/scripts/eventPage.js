@@ -12,15 +12,16 @@ db.ref(`users/userId1/lobbies`).once('value').then(lobbiesHistory => {
 });
 
 browser.runtime.onConnect.addListener(port => {
+  let currentLobbyId = null;
   port.onDisconnect.addListener(() => {
-    db.ref(`videoControllers/${message.payload.lobbyId}/numOfUsers`).
+    db.ref(`videoControllers/${currentLobbyId}/numOfUsers`).
         once('value').
         then(numOfUsers => {
           if (numOfUsers.val() === 1) {
-            db.ref(`videoControllers/${message.payload.lobbyId}/`).
+            db.ref(`videoControllers/${currentLobbyId}/`).
                 once('value').
                 then(lobbyInfo => {
-                  db.ref(`videoControllers/${message.payload.lobbyId}/`).
+                  db.ref(`videoControllers/${currentLobbyId}/`).
                       update({
                         time: lobbyInfo.val().time +
                         (Date.now() - lobbyInfo.val().updateTime),
@@ -29,13 +30,14 @@ browser.runtime.onConnect.addListener(port => {
                       });
                 });
           }
-          db.ref(`videoControllers/${message.payload.lobbyId}/numOfUsers`).
-              update(numOfUsers.val() - 1);
+          db.ref(`videoControllers/${currentLobbyId}/`).
+              update({numOfUsers: numOfUsers.val() - 1});
         });
   });
   port.onMessage.addListener(message => {
     switch (message.type) {
       case LINK_WITH_LOBBY: {
+        currentLobbyId = message.payload.lobbyId;
         db.ref(`videoControllers/${message.payload.lobbyId}/numOfUsers`).
             once('value').
             then(numOfUsers => {
@@ -50,7 +52,7 @@ browser.runtime.onConnect.addListener(port => {
                   });
               db.ref(`videoControllers/${message.payload.lobbyId}/time`).
                   on('value', time => {
-                    if (numOfUsers.val() === 0 && !currentIsPlaying) {
+                    if (numOfUsers.val() === 0 || !currentIsPlaying) {
                       port.postMessage({
                         type: VIDEO_CONTROL,
                         payload: {time: time.val()},
@@ -64,35 +66,25 @@ browser.runtime.onConnect.addListener(port => {
                               type: VIDEO_CONTROL,
                               payload: {
                                 time: time.val() +
-                                (Date.now() - updateTime.val()),
+                                ((Date.now() - updateTime.val()) / 1000),
                               },
                             });
                           });
                     }
                   });
-              console.log(numOfUsers.val());
               db.ref(`videoControllers/${message.payload.lobbyId}/numOfUsers`).
                   set(numOfUsers.val() + 1);
             });
         break;
       }
       case VIDEO_CONTROL: {
-        db.ref(`videoControllers/${message.payload.lobbyId}/`).
+        db.ref(`videoControllers/${currentLobbyId}/`).
             update(Object.assign(message.payload, {updateTime: Date.now()}));
         break;
       }
     }
   });
 });
-
-/*browser.storage.sync.set({
-  lobbiesHistory: {
-    lobbyId0: {
-      name: 'KEK Show',
-      videoIdentity: {},
-    },
-  },
-});*/
 
 browser.runtime.onMessage.addListener(message => {
   if (message.type === CONNECT_TO_LOBBY) {
