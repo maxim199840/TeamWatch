@@ -1,7 +1,7 @@
 import {browser} from '../browserApi';
 import {
-  BREAK_LINK_WITH_LOBBY,
-  LINK_WITH_LOBBY,
+  UNSYNC_WITH_LOBBY,
+  SYNC_WITH_LOBBY,
   VIDEO_CONTROL,
 } from '../messageTypes';
 
@@ -15,7 +15,7 @@ import {
   let video;
 
   function onSyncListener({type, payload}, sender, responseCallback) {
-    if (type !== LINK_WITH_LOBBY) return;
+    if (type !== SYNC_WITH_LOBBY) return;
 
     const isTabMatched = checkVideoIdentityMatch(payload.videoIdentity);
     if (!isTabMatched) {
@@ -35,7 +35,7 @@ import {
     port = browser.runtime.connect();
     port.onMessage.addListener(onVideoControlListener);
     port.postMessage({
-      type: LINK_WITH_LOBBY,
+      type: SYNC_WITH_LOBBY,
       payload: {
         lobbyId: payload.lobbyId,
       },
@@ -63,7 +63,7 @@ import {
   }
 
   function onUnsyncListener({type, payload}) {
-    if (type !== BREAK_LINK_WITH_LOBBY || lobbyId !== payload.lobbyId) return;
+    if (type !== UNSYNC_WITH_LOBBY || lobbyId !== payload.lobbyId) return;
 
     video.onplay = null;
     video.onpause = null;

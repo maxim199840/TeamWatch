@@ -1,7 +1,7 @@
 import {browser} from '../browserApi';
 import {db} from '../firebaseController';
 import {
-  LINK_WITH_LOBBY,
+  SYNC_WITH_LOBBY,
   VIDEO_CONTROL,
   CONNECT_TO_LOBBY, DISCONNECT_FROM_LOBBY,
 } from '../messageTypes';
@@ -40,7 +40,7 @@ browser.runtime.onConnect.addListener(port => {
   });
   port.onMessage.addListener(message => {
     switch (message.type) {
-      case LINK_WITH_LOBBY: {
+      case SYNC_WITH_LOBBY: {
         browser.storage.sync.get('lobbiesHistory', objWithHistory => {
           objWithHistory.lobbiesHistory[message.payload.lobbyId].sync = true;
           browser.storage.sync.set(objWithHistory);

@@ -18,7 +18,7 @@
   import Authorization from './Authorization';
   import Overview from './Overview';
   import {browser} from '../browserApi';
-  import {BREAK_LINK_WITH_LOBBY, CONNECT_TO_LOBBY, DISCONNECT_FROM_LOBBY, LINK_WITH_LOBBY} from '../messageTypes';
+  import {UNSYNC_WITH_LOBBY, CONNECT_TO_LOBBY, DISCONNECT_FROM_LOBBY, SYNC_WITH_LOBBY} from '../messageTypes';
 
   export default {
     name: 'app',
@@ -84,7 +84,7 @@
           chrome.tabs.sendMessage(
               tabs[0].id,
               {
-                type: LINK_WITH_LOBBY,
+                type: SYNC_WITH_LOBBY,
                 payload: {
                   lobbyId,
                   videoIdentity: this.lobbiesHistory[lobbyId].videoIdentity,
@@ -103,7 +103,7 @@
       },
       unsync(lobbyId) {
         browser.tabs.query({}, tabs => {
-          tabs.forEach(tab => browser.tabs.sendMessage(tab.id, {type: BREAK_LINK_WITH_LOBBY, payload: {lobbyId}}));
+          tabs.forEach(tab => browser.tabs.sendMessage(tab.id, {type: UNSYNC_WITH_LOBBY, payload: {lobbyId}}));
         });
       },
     },
