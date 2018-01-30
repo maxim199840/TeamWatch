@@ -1,24 +1,64 @@
 import {browser} from '../browserApi';
-import {LINK_WITH_LOBBY} from '../messageTypes';
+import {LINK_WITH_LOBBY, VIDEO_CONTROL} from '../messageTypes';
 
 browser.runtime.onMessage.addListener(onMessage);
 
-function onMessage({type, payload}, sender, isConnectedCallback) {
+let video;
+
+function onMessage({type, payload}, sender, responseCallback) {
   switch (type) {
     case LINK_WITH_LOBBY: {
-      const isTabMathed = checkVideoIdentityMatch(payload.videoIdentity);
-      if (!isTabMathed) {
-        isConnectedCallback(false);
+      const isTabMatched = checkVideoIdentityMatch(payload.videoIdentity);
+      if (!isTabMatched) {
+        responseCallback(false);
         return;
       }
-      isConnectedCallback(true);
+      responseCallback(true);
+
+      video = document.
+          getElementsByClassName('video-stream html5-main-video')[0];
       const port = browser.runtime.connect();
+      port.onMessage.addListener(onMessage);
       port.postMessage({
         type: LINK_WITH_LOBBY,
         payload: {
           lobbyId: payload.lobbyId,
         },
       });
+
+      video.onplay = () => port.postMessage({
+        type: VIDEO_CONTROL,
+        payload: {
+          isPlaying: true,
+        },
+      });
+      video.onpause = () => port.postMessage({
+        type: VIDEO_CONTROL,
+        payload: {
+          isPlaying: false,
+        },
+      });
+      video.onseeked = () => port.postMessage({
+        type: VIDEO_CONTROL,
+        payload: {
+          time: video.currentTime,
+        },
+      });
+
+      break;
+    }
+    case VIDEO_CONTROL: {
+      const {isPlaying, time} = payload;
+      if (typeof(isPlaying) === 'boolean') {
+        if (isPlaying) {
+          video.play();
+        } else {
+          video.pause();
+        }
+      }
+      if (typeof time === 'number') {
+        video.currentTime = time;
+      }
       break;
     }
   }
@@ -31,14 +71,6 @@ function checkVideoIdentityMatch(videoIdentity) {
   }
 }
 
-// browser.storage.sync.get('lobbyId', ({lobbyId}) => {
-//   onLobbyChange(lobbyId);
-//   browser.storage.onChanged.addListener(({lobbyId}) => {
-//         if (lobbyId) onLobbyChange(lobbyId.newValue);
-//       },
-//   );
-// });
-//
 // function onLobbyChange(lobbyId) {
 //   if (port) {
 //     port.disconnect();
@@ -56,16 +88,6 @@ function checkVideoIdentityMatch(videoIdentity) {
 //   }
 // }
 
-// function lobbyListener(message) {
-//   console.log(message);
-//   if(message.link){
-//     currentLink = message.link;
-//     if(checkURL(message.link)){
-//       bindListeners();
-//     }
-//   }
-// }
-//
 // function bindListeners(){
 //   console.log('injected');
 //   let videoSyncMessenger = new Messenger('video');
@@ -86,12 +108,7 @@ function checkVideoIdentityMatch(videoIdentity) {
 //     /*video.currentTime = data.val();*/
 //   });
 // }
-//
-// function checkURL(link) {
-//   let url = new URL(document.location.href);
-//   return ((url.hostname === link.domain) &&
-//       (url.searchParams.get('v') === link.id));
-// }
+
 /*let video = document.getElementsByClassName('video-stream html5-main-video')[0];
 console.log('injected');
 storageController.getAsyncStorage('connectedLobbyRef').then(data => {
