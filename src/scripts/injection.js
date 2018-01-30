@@ -1,36 +1,55 @@
 import {browser} from '../browserApi';
 import {LINK_WITH_LOBBY} from '../messageTypes';
 
-let port;
+browser.runtime.onMessage.addListener(onMessage);
 
-browser.storage.sync.get('lobbyId', ({lobbyId}) => {
-  onLobbyChange(lobbyId);
-  browser.storage.onChanged.addListener(({lobbyId}) => {
-        if (lobbyId) onLobbyChange(lobbyId.newValue);
-      },
-  );
-});
-
-function onLobbyChange(lobbyId) {
-  if (port) {
-    port.disconnect();
-    port = null;
-  }
-  if (lobbyId) {
-    if (true/*Todo: check if this page is what we need (sorryamba for my bad English)*/) {
-      port = browser.runtime.connect({name: 'Tab'});
-      port.onMessage.addListener(onNewMessage);
+function onMessage({type, payload}) {
+  switch (type) {
+    case LINK_WITH_LOBBY: {
+      const isTabMathed = checkVideoIdentityMatch(payload.videoIdentity);
+      const port = browser.runtime.connect();
       port.postMessage({
         type: LINK_WITH_LOBBY,
-        payload: {lobbyId},
+        payload: {
+          lobbyId: payload.lobbyId,
+        },
       });
+      break;
     }
   }
 }
 
-function onNewMessage(message) {
-  console.log(message);
+function checkVideoIdentityMatch(videoIdentity) {
+  const url = new URL(document.location.href);
+  if (url.hostname === videoIdentity.hostname) {
+    return url.searchParams.get('v') === videoIdentity.v;
+  }
 }
+
+// browser.storage.sync.get('lobbyId', ({lobbyId}) => {
+//   onLobbyChange(lobbyId);
+//   browser.storage.onChanged.addListener(({lobbyId}) => {
+//         if (lobbyId) onLobbyChange(lobbyId.newValue);
+//       },
+//   );
+// });
+//
+// function onLobbyChange(lobbyId) {
+//   if (port) {
+//     port.disconnect();
+//     port = null;
+//   }
+//   if (lobbyId) {
+//     if (true/*Todo: check if this page is what we need (sorryamba for my bad English)*/) {
+//       port = browser.runtime.connect({name: 'Tab'});
+//       port.onMessage.addListener(onMessage);
+//       port.postMessage({
+//         type: LINK_WITH_LOBBY,
+//         payload: {lobbyId},
+//       });
+//     }
+//   }
+// }
 
 // function lobbyListener(message) {
 //   console.log(message);

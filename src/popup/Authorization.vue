@@ -19,7 +19,9 @@
     },
     methods: {
       loginClick({target: {value}}) {
-        this.$emit('login', {userId: value});
+        this.$emit('login', {
+          userId: value,
+        });
       },
     },
   };

@@ -4,7 +4,7 @@
             <authorization @login="login"/>
         </template>
         <template v-else>
-            <overview v-bind="{lobbiesHistory}" @logout="logout" @connect="connect"/>
+            <overview v-bind:lobbies-history="lobbiesHistory" @logout="logout" @connect="connect" @sync="sync"/>
         </template>
     </div>
 </template>
@@ -13,7 +13,10 @@
   import Authorization from './Authorization';
   import Overview from './Overview';
   import {browser} from '../browserApi';
-  import {CONNECT_TO_LOBBY} from '../messageTypes';
+  import {
+    CONNECT_TO_LOBBY,
+    LINK_WITH_LOBBY,
+  } from '../messageTypes';
 
   export default {
     name: 'app',
@@ -27,6 +30,11 @@
       Authorization,
       Overview,
     },
+    watch: {
+      user(value) {
+        browser.storage.sync.set({user: value});
+      },
+    },
     computed: {
       isAuthorized() {
         return this.user;
@@ -38,8 +46,12 @@
         this.lobbiesHistory = lobbiesHistory;
       });
       browser.storage.onChanged.addListener(({user, lobbiesHistory}) => {
-        this.user = user ? user.newValue : null;
-        this.lobbiesHistory = lobbiesHistory ? lobbiesHistory.newValue : null;
+        if (user) {
+          this.user = user.newValue;
+        }
+        if (lobbiesHistory) {
+          this.lobbiesHistory = lobbiesHistory.newValue;
+        }
       });
     },
     methods: {
@@ -55,6 +67,17 @@
           payload: {
             lobbyId,
           },
+        });
+      },
+      sync(lobbyId) {
+        browser.tabs.query({active: true, currentWindow: true}, ({0: tab}) => {
+          chrome.tabs.sendMessage(tab.id, {
+            type: LINK_WITH_LOBBY,
+            payload: {
+              lobbyId,
+              videoIdentity: this.lobbiesHistory[lobbyId].videoIdentity,
+            },
+          });
         });
       },
     },
