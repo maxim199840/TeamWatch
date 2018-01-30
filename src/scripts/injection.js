@@ -1,7 +1,7 @@
 import {browser} from '../browserApi';
 import {
-  UNSYNC_WITH_LOBBY,
   SYNC_WITH_LOBBY,
+  UNSYNC_WITH_LOBBY,
   VIDEO_CONTROL,
 } from '../messageTypes';
 
@@ -53,13 +53,16 @@ import {
         isPlaying: false,
       },
     });
-    video.onseeked = () => port.postMessage({
-      type: VIDEO_CONTROL,
-      payload: {
-        isPlaying: false,
-        time: video.currentTime,
-      },
-    });
+    video.onseeked = () => {
+      video.pause();
+      port.postMessage({
+        type: VIDEO_CONTROL,
+        payload: {
+          isPlaying: false,
+          time: video.currentTime,
+        },
+      });
+    };
   }
 
   function onUnsyncListener({type, payload}) {

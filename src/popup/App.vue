@@ -72,6 +72,7 @@
         });
       },
       disconnect(lobbyId) {
+        this.unsync(lobbyId);
         browser.runtime.sendMessage({
           type: DISCONNECT_FROM_LOBBY,
           payload: {
