@@ -8,7 +8,8 @@
                       @logout="logout"
                       @connect="connect"
                       @disconnect="disconnect"
-                      @sync="sync"/>
+                      @sync="sync"
+                      @unsync="unsync"/>
         </template>
     </div>
 </template>
@@ -79,9 +80,9 @@
         });
       },
       sync(lobbyId) {
-        browser.tabs.query({active: true, currentWindow: true}, ({0: tab}) => {
+        browser.tabs.query({active: true, currentWindow: true}, tabs => {
           chrome.tabs.sendMessage(
-              tab.id,
+              tabs[0].id,
               {
                 type: LINK_WITH_LOBBY,
                 payload: {
@@ -91,13 +92,18 @@
               },
               isConnected => {
                 if (isConnected) {
-                  alert('Successful!');
+                  console.log('Synced!');
                 }
                 else {
-                  alert('Failed!');
+                  console.log('Not synced!');
                 }
               },
           );
+        });
+      },
+      unsync(lobbyId) {
+        browser.tabs.query({}, tabs => {
+          tabs.forEach(tab => browser.tabs.sendMessage(tab.id, {type: BREAK_LINK_WITH_LOBBY, payload: {lobbyId}}));
         });
       },
     },

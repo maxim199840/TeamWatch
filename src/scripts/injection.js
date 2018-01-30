@@ -1,5 +1,9 @@
 import {browser} from '../browserApi';
-import {LINK_WITH_LOBBY, VIDEO_CONTROL} from '../messageTypes';
+import {
+  BREAK_LINK_WITH_LOBBY,
+  LINK_WITH_LOBBY,
+  VIDEO_CONTROL,
+} from '../messageTypes';
 
 (function() {
 
@@ -7,6 +11,7 @@ import {LINK_WITH_LOBBY, VIDEO_CONTROL} from '../messageTypes';
 
   let videoIdentity;
   let lobbyId;
+  let port;
   let video;
 
   function onSyncListener({type, payload}, sender, responseCallback) {
@@ -20,13 +25,14 @@ import {LINK_WITH_LOBBY, VIDEO_CONTROL} from '../messageTypes';
     responseCallback(true);
 
     browser.runtime.onMessage.removeListener(onSyncListener);
+    browser.runtime.onMessage.addListener(onUnsyncListener);
 
     videoIdentity = payload.videoIdentity;
     lobbyId = payload.lobbyId;
 
     video = document.getElementsByClassName('video-stream html5-main-video')[0];
 
-    const port = browser.runtime.connect();
+    port = browser.runtime.connect();
     port.onMessage.addListener(onVideoControlListener);
     port.postMessage({
       type: LINK_WITH_LOBBY,
@@ -54,6 +60,20 @@ import {LINK_WITH_LOBBY, VIDEO_CONTROL} from '../messageTypes';
         time: video.currentTime,
       },
     });
+  }
+
+  function onUnsyncListener({type, payload}) {
+    if (type !== BREAK_LINK_WITH_LOBBY || lobbyId !== payload.lobbyId) return;
+
+    video.onplay = null;
+    video.onpause = null;
+    video.onseeked = null;
+
+    port.disconnect();
+    port = null;
+
+    browser.runtime.onMessage.removeListener(onUnsyncListener);
+    browser.runtime.onMessage.addListener(onSyncListener);
   }
 
   function onVideoControlListener({type, payload}) {
