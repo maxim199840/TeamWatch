@@ -3,10 +3,15 @@ import {LINK_WITH_LOBBY} from '../messageTypes';
 
 browser.runtime.onMessage.addListener(onMessage);
 
-function onMessage({type, payload}) {
+function onMessage({type, payload}, sender, isConnectedCallback) {
   switch (type) {
     case LINK_WITH_LOBBY: {
       const isTabMathed = checkVideoIdentityMatch(payload.videoIdentity);
+      if (!isTabMathed) {
+        isConnectedCallback(false);
+        return;
+      }
+      isConnectedCallback(true);
       const port = browser.runtime.connect();
       port.postMessage({
         type: LINK_WITH_LOBBY,

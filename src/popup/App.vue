@@ -71,13 +71,24 @@
       },
       sync(lobbyId) {
         browser.tabs.query({active: true, currentWindow: true}, ({0: tab}) => {
-          chrome.tabs.sendMessage(tab.id, {
-            type: LINK_WITH_LOBBY,
-            payload: {
-              lobbyId,
-              videoIdentity: this.lobbiesHistory[lobbyId].videoIdentity,
-            },
-          });
+          chrome.tabs.sendMessage(
+              tab.id,
+              {
+                type: LINK_WITH_LOBBY,
+                payload: {
+                  lobbyId,
+                  videoIdentity: this.lobbiesHistory[lobbyId].videoIdentity,
+                },
+              },
+              isConnected => {
+                if (isConnected) {
+                  alert('Successful!');
+                }
+                else {
+                  alert('Failed!');
+                }
+              },
+          );
         });
       },
     },
