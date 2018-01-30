@@ -24,7 +24,7 @@ browser.runtime.onConnect.addListener(port => {
                   db.ref(`videoControllers/${currentLobbyId}/`).
                       update({
                         time: lobbyInfo.val().time +
-                        (Date.now() - lobbyInfo.val().updateTime),
+                        ((Date.now() - lobbyInfo.val().updateTime)/1000),
                         updateTime: Date.now(),
                         isPlaying: false,
                       });
