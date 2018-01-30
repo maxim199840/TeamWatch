@@ -4,7 +4,11 @@
             <authorization @login="login"/>
         </template>
         <template v-else>
-            <overview v-bind:lobbies-history="lobbiesHistory" @logout="logout" @connect="connect" @sync="sync"/>
+            <overview v-bind:lobbies-history="lobbiesHistory"
+                      @logout="logout"
+                      @connect="connect"
+                      @disconnect="disconnect"
+                      @sync="sync"/>
         </template>
     </div>
 </template>
@@ -13,10 +17,7 @@
   import Authorization from './Authorization';
   import Overview from './Overview';
   import {browser} from '../browserApi';
-  import {
-    CONNECT_TO_LOBBY,
-    LINK_WITH_LOBBY,
-  } from '../messageTypes';
+  import {BREAK_LINK_WITH_LOBBY, CONNECT_TO_LOBBY, DISCONNECT_FROM_LOBBY, LINK_WITH_LOBBY} from '../messageTypes';
 
   export default {
     name: 'app',
@@ -64,6 +65,14 @@
       connect(lobbyId) {
         browser.runtime.sendMessage({
           type: CONNECT_TO_LOBBY,
+          payload: {
+            lobbyId,
+          },
+        });
+      },
+      disconnect(lobbyId) {
+        browser.runtime.sendMessage({
+          type: DISCONNECT_FROM_LOBBY,
           payload: {
             lobbyId,
           },
