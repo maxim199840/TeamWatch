@@ -70,8 +70,9 @@ browser.runtime.onConnect.addListener(port => {
                           });
                     }
                   });
-              db.ref(`videoControllers/${message.payload.lobbyId}/`).
-                  update({numOfUsers: numOfUsers.val() + 1});
+              console.log(numOfUsers.val());
+              db.ref(`videoControllers/${message.payload.lobbyId}/numOfUsers`).
+                  set(numOfUsers.val() + 1);
             });
         break;
       }
