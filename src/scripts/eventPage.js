@@ -3,10 +3,12 @@ import {db} from '../firebaseController';
 import {
   SYNC_WITH_LOBBY,
   VIDEO_CONTROL,
-  CONNECT_TO_LOBBY, DISCONNECT_FROM_LOBBY,
+  CONNECT_TO_LOBBY,
+  DISCONNECT_FROM_LOBBY,
+  CREATE_LOBBY, NEW_VIDEO_TO_LOBBY,
 } from '../messageTypes';
-
-db.ref(`users/userId1/lobbies`).once('value').then(lobbiesHistory => {
+const userId = 'userId1';
+db.ref(`users/${userId}/lobbies`).once('value').then(lobbiesHistory => {
   console.log(lobbiesHistory.val());
   browser.storage.sync.set({lobbiesHistory: lobbiesHistory.val()});
 });
@@ -115,8 +117,33 @@ browser.runtime.onMessage.addListener(message => {
       });
       break;
     }
+    case CREATE_LOBBY: {
+      let newLobbyRef = db.ref("lobbies/").push({name: message.payload.name});
+      db.ref(`users/${userId}/lobbies/${newLobbyRef.key}`).set({name: message.payload.name});
+      db.ref(`videoControllers/${newLobbyRef.key}/`).set({
+        isPlaying: false,
+        time: 0,
+        updateTime: 0,
+        numOfUsers: 0,
+      });
+      browser.storage.sync.get('lobbiesHistory', objWithHistory => {
+        objWithHistory.lobbiesHistory[newLobbyRef.key] = {name: message.payload.name};
+        browser.storage.sync.set(objWithHistory);
+      });
+      setLinkToLobby({lobbyId: newLobbyRef.key, videoIdentity: message.payload.videoIdentity, videoState: message.payload.videoState});
+      break;
+    }
+    case NEW_VIDEO_TO_LOBBY:{
+      setLinkToLobby({lobbyId: message.payload.lobbyId, videoIdentity:message.payload.videoIdentity, videoState: message.payload.videoState});
+      break;
+    }
   }
 });
+
+function setLinkToLobby(linkInfo){
+  db.ref(`videoControllers/${linkInfo.lobbyId}/`).update(linkInfo.videoState);
+  db.ref(`videos/${linkInfo.lobbyId}`).set(linkInfo.videoState);
+}
 
 function generateLink(videoIdentity){
   let url = "";
