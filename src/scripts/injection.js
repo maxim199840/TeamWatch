@@ -12,7 +12,10 @@ import {
   let videoIdentity;
   let lobbyId;
   let port;
-  let video;
+  let videoElement;
+  let isProgramPlayAction = false;
+  let isProgramPauseAction = false;
+  let isProgramSeekAction = false;
 
   function onSyncListener({type, payload}, sender, responseCallback) {
     if (type !== SYNC_WITH_LOBBY) return;
@@ -30,7 +33,8 @@ import {
     videoIdentity = payload.videoIdentity;
     lobbyId = payload.lobbyId;
 
-    video = document.getElementsByClassName('video-stream html5-main-video')[0];
+    videoElement = document.
+        getElementsByClassName('video-stream html5-main-video')[0];
 
     port = browser.runtime.connect();
     port.onMessage.addListener(onVideoControlListener);
@@ -41,27 +45,44 @@ import {
       },
     });
 
-    video.onplay = () => port.postMessage({
-      type: VIDEO_CONTROL,
-      payload: {
-        isPlaying: true,
-        time: video.currentTime,
-      },
-    });
-    video.onpause = () => port.postMessage({
-      type: VIDEO_CONTROL,
-      payload: {
-        isPlaying: false,
-        time: video.currentTime,
-      },
-    });
-    video.onseeked = () => {
-      video.pause();
+    videoElement.onplay = () => {
+      if (isProgramPlayAction) {
+        isProgramPlayAction = false;
+        return;
+      }
+      port.postMessage({
+        type: VIDEO_CONTROL,
+        payload: {
+          isPlaying: true,
+          time: videoElement.currentTime,
+        },
+      });
+    };
+    videoElement.onpause = () => {
+      if (isProgramPauseAction) {
+        isProgramPauseAction = false;
+        return;
+      }
       port.postMessage({
         type: VIDEO_CONTROL,
         payload: {
           isPlaying: false,
-          time: video.currentTime,
+          time: videoElement.currentTime,
+        },
+      });
+    };
+    videoElement.onseeked = () => {
+      if (isProgramSeekAction) {
+        isProgramSeekAction = false;
+        return;
+      }
+      isProgramPauseAction = true;
+      videoElement.pause();
+      port.postMessage({
+        type: VIDEO_CONTROL,
+        payload: {
+          isPlaying: false,
+          time: videoElement.currentTime,
         },
       });
     };
@@ -70,9 +91,9 @@ import {
   function onUnsyncListener({type, payload}) {
     if (type !== UNSYNC_WITH_LOBBY || lobbyId !== payload.lobbyId) return;
 
-    video.onplay = null;
-    video.onpause = null;
-    video.onseeked = null;
+    videoElement.onplay = null;
+    videoElement.onpause = null;
+    videoElement.onseeked = null;
 
     port.disconnect();
     port = null;
@@ -87,13 +108,16 @@ import {
     const {isPlaying, time} = payload;
     if (typeof(isPlaying) === 'boolean') {
       if (isPlaying) {
-        video.play();
+        isProgramPlayAction = true;
+        videoElement.play();
       } else {
-        video.pause();
+        isProgramPauseAction = true;
+        videoElement.pause();
       }
     }
     if (typeof time === 'number') {
-      video.currentTime = time;
+      isProgramSeekAction = true;
+      videoElement.currentTime = time;
     }
   }
 
