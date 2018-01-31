@@ -45,12 +45,14 @@ import {
       type: VIDEO_CONTROL,
       payload: {
         isPlaying: true,
+        time: video.currentTime,
       },
     });
     video.onpause = () => port.postMessage({
       type: VIDEO_CONTROL,
       payload: {
         isPlaying: false,
+        time: video.currentTime,
       },
     });
     video.onseeked = () => {
