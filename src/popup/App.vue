@@ -6,6 +6,7 @@
         <template v-else>
             <overview v-bind:lobbies-history="lobbiesHistory"
                       @logout="logout"
+                      @create-lobby="createLobby"
                       @connect="connect"
                       @disconnect="disconnect"
                       @sync="sync"
@@ -18,7 +19,13 @@
   import Authorization from './Authorization';
   import Overview from './Overview';
   import {browser} from '../browserApi';
-  import {UNSYNC_WITH_LOBBY, CONNECT_TO_LOBBY, DISCONNECT_FROM_LOBBY, SYNC_WITH_LOBBY} from '../messageTypes';
+  import {
+    CONNECT_TO_LOBBY,
+    CREATE_LOBBY,
+    DISCONNECT_FROM_LOBBY,
+    SYNC_WITH_LOBBY,
+    UNSYNC_WITH_LOBBY,
+  } from '../messageTypes';
 
   export default {
     name: 'app',
@@ -62,6 +69,28 @@
       },
       logout() {
         this.user = null;
+      },
+      createLobby(name) {
+        name = `Lobby #${Math.floor(Math.random() * 999)}`;
+        browser.tabs.query({active: true, currentWindow: true}, tabs => {
+          chrome.tabs.sendMessage(
+              tabs[0].id,
+              {
+                type: CREATE_LOBBY,
+                payload: {
+                  name,
+                },
+              },
+              isCreated => {
+                if (isCreated) {
+                  console.log('Created!');
+                }
+                else {
+                  console.log('Not created!');
+                }
+              },
+          );
+        });
       },
       connect(lobbyId) {
         browser.runtime.sendMessage({

@@ -1,5 +1,6 @@
 import {browser} from '../browserApi';
 import {
+  CREATE_LOBBY,
   SYNC_WITH_LOBBY,
   UNSYNC_WITH_LOBBY,
   VIDEO_CONTROL,
@@ -7,6 +8,7 @@ import {
 
 (function() {
 
+  browser.runtime.onMessage.addListener(onCreateLobbyListener);
   browser.runtime.onMessage.addListener(onSyncListener);
 
   let videoIdentity;
@@ -17,15 +19,34 @@ import {
   let isProgramPauseAction = false;
   let isProgramSeekAction = false;
 
-  function onSyncListener({type, payload}, sender, responseCallback) {
+  function onCreateLobbyListener({type, payload}, sender, isCreatedCallback) {
+    if (type !== CREATE_LOBBY) return;
+
+    const videoIdentity = createVideoIdentity();
+
+    if (!videoIdentity) {
+      isCreatedCallback(false);
+    }
+    isCreatedCallback(true);
+
+    browser.runtime.sendMessage({
+      type: CREATE_LOBBY,
+      payload: {
+        name: payload.name,
+        videoIdentity,
+      },
+    });
+  }
+
+  function onSyncListener({type, payload}, sender, isSyncedCallback) {
     if (type !== SYNC_WITH_LOBBY) return;
 
-    const isTabMatched = checkVideoIdentityMatch(payload.videoIdentity);
+    const isTabMatched = matchVideoIdentity(payload.videoIdentity);
     if (!isTabMatched) {
-      responseCallback(false);
+      isSyncedCallback(false);
       return;
     }
-    responseCallback(true);
+    isSyncedCallback(true);
 
     browser.runtime.onMessage.removeListener(onSyncListener);
     browser.runtime.onMessage.addListener(onUnsyncListener);
@@ -120,7 +141,17 @@ import {
     }
   }
 
-  function checkVideoIdentityMatch(videoIdentity) {
+  function createVideoIdentity() {
+    const url = new URL(document.location.href);
+    const hostname = url.hostname;
+    if (hostname === 'www.youtube.com') {
+      const v = url.searchParams.get('v');
+      if (v) return {hostname, v};
+    }
+    return null;
+  }
+
+  function matchVideoIdentity(videoIdentity) {
     const url = new URL(document.location.href);
     if (url.hostname === videoIdentity.hostname) {
       return url.searchParams.get('v') === videoIdentity.v;

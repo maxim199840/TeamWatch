@@ -1,6 +1,13 @@
 <template>
     <div>
         <button @click="$emit('logout')">Logout</button>
+        <div>
+            <h2>
+                <label @click="$emit('create-lobby')">
+                    Create lobby
+                </label>
+            </h2>
+        </div>
         <div v-for="(lobbyDetails,lobbyId) in lobbiesHistory">
             <h3 v-if="isLobbyConnected(lobbyId)">
                 {{lobbyDetails.name}}
