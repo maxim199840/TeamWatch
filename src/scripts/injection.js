@@ -6,20 +6,22 @@ import {
   VIDEO_CONTROL,
 } from '../messageTypes';
 
+console.info('Team Watch injected..');
+
 (function() {
 
-  browser.runtime.onMessage.addListener(onCreateLobbyListener);
-  browser.runtime.onMessage.addListener(onSyncListener);
+  browser.runtime.onMessage.addListener(onCreateLobby);
+  browser.runtime.onMessage.addListener(onSync);
 
   let videoIdentity;
   let lobbyId;
   let port;
-  let videoElement;
+  let video;
   let isProgramPlayAction = false;
   let isProgramPauseAction = false;
   let isProgramSeekAction = false;
 
-  function onCreateLobbyListener({type, payload}, sender, isCreatedCallback) {
+  function onCreateLobby({type, payload}, sender, isCreatedCallback) {
     if (type !== CREATE_LOBBY) return;
 
     const videoIdentity = createVideoIdentity();
@@ -38,27 +40,27 @@ import {
     });
   }
 
-  function onSyncListener({type, payload}, sender, isSyncedCallback) {
+  function onSync({type, payload}, sender, isSyncedCallback) {
     if (type !== SYNC_WITH_LOBBY) return;
 
-    const isTabMatched = matchVideoIdentity(payload.videoIdentity);
-    if (!isTabMatched) {
+    const isVideoIdentityMatched = matchVideoIdentity(payload.videoIdentity);
+    if (!isVideoIdentityMatched) {
       isSyncedCallback(false);
       return;
     }
     isSyncedCallback(true);
 
-    browser.runtime.onMessage.removeListener(onSyncListener);
-    browser.runtime.onMessage.addListener(onUnsyncListener);
+    browser.runtime.onMessage.removeListener(onSync);
+    browser.runtime.onMessage.addListener(onUnsync);
 
     videoIdentity = payload.videoIdentity;
     lobbyId = payload.lobbyId;
 
-    videoElement = document.
+    video = document.
         getElementsByClassName('video-stream html5-main-video')[0];
 
     port = browser.runtime.connect();
-    port.onMessage.addListener(onVideoControlListener);
+    port.onMessage.addListener(onVideoControl);
     port.postMessage({
       type: SYNC_WITH_LOBBY,
       payload: {
@@ -66,98 +68,59 @@ import {
       },
     });
 
-    videoElement.onplay = () => {
-      console.log('onplay:', isProgramPlayAction ? 'by program' : 'sended');
+    video.onplay = () => {
       if (isProgramPlayAction) {
+        console.log('Play is triggered by program.');
         isProgramPlayAction = false;
         return;
       }
+
+      const payload = {
+        isPlaying: true,
+      };
+      console.
+          log('Play is triggered by player and send to eventPage:', payload);
       port.postMessage({
         type: VIDEO_CONTROL,
-        payload: {
-          isPlaying: true,
-        },
+        payload,
       });
     };
-    videoElement.onpause = () => {
-      console.log('onpause:', isProgramPauseAction ? 'by program' : 'sended');
+
+    video.onpause = () => {
       if (isProgramPauseAction) {
+        console.log('Pause is triggered by program.');
         isProgramPauseAction = false;
         return;
       }
-      port.postMessage({
-        type: VIDEO_CONTROL,
-        payload: {
-          isPlaying: false,
-          time: videoElement.currentTime,
-        },
-      });
+
+      const payload = {
+        isPlaying: false,
+        time: video.currentTime,
+      };
+      console.
+          log('Pause is triggered by player and send to eventPage:', payload);
+      port.postMessage({type: VIDEO_CONTROL, payload});
     };
-    videoElement.onseeked = () => {
-      console.log('onseeked:', 'sended');
+
+    video.onseeked = () => {
       if (isProgramSeekAction) {
         isProgramSeekAction = false;
+        return;
       }
-      //TODO: function pause
-      console.log('pause on seeked from user:',
-          videoElement.paused ? 'already paused' : 'success');
-      if (!videoElement.paused) {
+
+      const payload = {
+        isPlaying: false,
+        time: video.currentTime,
+      };
+      console.log('Seek triggered and send to eventPage:', payload);
+      port.postMessage({type: VIDEO_CONTROL, payload});
+
+      if (!video.paused) {
+        console.log('Trigger pause because video is not paused.');
         isProgramPauseAction = true;
-        videoElement.pause();
+        video.pause();
       }
-
-      port.postMessage({
-        type: VIDEO_CONTROL,
-        payload: {
-          isPlaying: false,
-          time: videoElement.currentTime,
-        },
-      });
     };
-  }
-
-  function onUnsyncListener({type, payload}) {
-    if (type !== UNSYNC_WITH_LOBBY || lobbyId !== payload.lobbyId) return;
-
-    videoElement.onplay = null;
-    videoElement.onpause = null;
-    videoElement.onseeked = null;
-
-    port.disconnect();
-    port = null;
-
-    browser.runtime.onMessage.removeListener(onUnsyncListener);
-    browser.runtime.onMessage.addListener(onSyncListener);
-  }
-
-  function onVideoControlListener({type, payload}) {
-    if (type !== VIDEO_CONTROL) return;
-
-    if (typeof(payload.isPlaying) === 'boolean') {
-      if (payload.isPlaying) {
-        //TODO: function play
-        console.log('play from firebase:',
-            !videoElement.paused ? 'already playing' : 'success');
-        if (videoElement.paused) {
-          isProgramPlayAction = true;
-          videoElement.play();
-        }
-      } else {
-        //TODO: function pause
-        console.log('pause from firebase:',
-            videoElement.paused ? 'already paused' : 'success');
-        if (!videoElement.paused) {
-          isProgramPauseAction = true;
-          videoElement.pause();
-        }
-      }
-    }
-    if (typeof payload.time === 'number') {
-      //TODO: function seek
-      isProgramSeekAction = true;
-      console.log('seek from firebase');
-      videoElement.currentTime = payload.time;
-    }
   }
 
   function createVideoIdentity() {
@@ -175,6 +138,48 @@ import {
     if (url.hostname === videoIdentity.hostname) {
       return url.searchParams.get('v') === videoIdentity.v;
     }
+    return false;
+  }
+
+  function onVideoControl({type, payload}) {
+    if (type !== VIDEO_CONTROL) return;
+
+    console.log('From eventPage:', payload);
+
+    if (payload.hasOwnProperty('isPlaying')) {
+      if (payload.isPlaying) {
+        if (video.paused) {
+          isProgramPlayAction = true;
+          video.play();
+        }
+      } else {
+        if (!video.paused) {
+          isProgramPauseAction = true;
+          video.pause();
+        }
+      }
+    }
+    if (payload.hasOwnProperty('time')) {
+      isProgramSeekAction = true;
+      video.currentTime = payload.time;
+    }
+  }
+
+  function onUnsync({type, payload}) {
+    if (type !== UNSYNC_WITH_LOBBY || lobbyId !== payload.lobbyId) return;
+
+    video.onplay = null;
+    video.onpause = null;
+    video.onseeked = null;
+
+    port.onMessage.removeListener(onVideoControl);
+    port.disconnect();
+    port = null;
+
+    video = null;
+
+    browser.runtime.onMessage.removeListener(onUnsync);
+    browser.runtime.onMessage.addListener(onSync);
   }
 
 })();
