@@ -67,6 +67,7 @@ import {
     });
 
     videoElement.onplay = () => {
+      console.log('onplay:', isProgramPlayAction ? 'by program' : 'sended');
       if (isProgramPlayAction) {
         isProgramPlayAction = false;
         return;
@@ -79,6 +80,7 @@ import {
       });
     };
     videoElement.onpause = () => {
+      console.log('onpause:', isProgramPauseAction ? 'by program' : 'sended');
       if (isProgramPauseAction) {
         isProgramPauseAction = false;
         return;
@@ -92,12 +94,18 @@ import {
       });
     };
     videoElement.onseeked = () => {
+      console.log('onseeked:', 'sended');
       if (isProgramSeekAction) {
         isProgramSeekAction = false;
-        return;
       }
-      isProgramPauseAction = true;
-      videoElement.pause();
+      //TODO: function pause
+      console.log('pause on seeked from user:',
+          videoElement.paused ? 'already paused' : 'success');
+      if (!videoElement.paused) {
+        isProgramPauseAction = true;
+        videoElement.pause();
+      }
+
       port.postMessage({
         type: VIDEO_CONTROL,
         payload: {
@@ -125,19 +133,30 @@ import {
   function onVideoControlListener({type, payload}) {
     if (type !== VIDEO_CONTROL) return;
 
-    const {isPlaying, time} = payload;
-    if (typeof(isPlaying) === 'boolean') {
-      if (isPlaying) {
-        isProgramPlayAction = true;
-        videoElement.play();
+    if (typeof(payload.isPlaying) === 'boolean') {
+      if (payload.isPlaying) {
+        //TODO: function play
+        console.log('play from firebase:',
+            !videoElement.paused ? 'already playing' : 'success');
+        if (videoElement.paused) {
+          isProgramPlayAction = true;
+          videoElement.play();
+        }
       } else {
-        isProgramPauseAction = true;
-        videoElement.pause();
+        //TODO: function pause
+        console.log('pause from firebase:',
+            videoElement.paused ? 'already paused' : 'success');
+        if (!videoElement.paused) {
+          isProgramPauseAction = true;
+          videoElement.pause();
+        }
       }
     }
-    if (typeof time === 'number') {
+    if (typeof payload.time === 'number') {
+      //TODO: function seek
       isProgramSeekAction = true;
-      videoElement.currentTime = time;
+      console.log('seek from firebase');
+      videoElement.currentTime = payload.time;
     }
   }
 
