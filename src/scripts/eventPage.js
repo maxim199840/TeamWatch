@@ -7,6 +7,7 @@ import {
   DISCONNECT_FROM_LOBBY,
   CREATE_LOBBY, NEW_VIDEO_TO_LOBBY,
 } from '../messageTypes';
+
 const userId = 'userId1';
 db.ref(`users/${userId}/lobbies`).once('value').then(lobbiesHistory => {
   console.log(lobbiesHistory.val());
@@ -14,20 +15,20 @@ db.ref(`users/${userId}/lobbies`).once('value').then(lobbiesHistory => {
 });
 
 browser.runtime.onConnect.addListener(port => {
-  let currentLobbyId = null;
+  let currentLobbyId = null, videoControllersRef, videoState = {isPlaying: false, time: 0};
   port.onDisconnect.addListener(() => {
     browser.storage.sync.get('lobbiesHistory', objWithHistory => {
       objWithHistory.lobbiesHistory[currentLobbyId].sync = false;
       browser.storage.sync.set(objWithHistory);
     });
-    db.ref(`videoControllers/${currentLobbyId}/numOfUsers`).
+    videoControllersRef.child('numOfUsers').
         once('value').
         then(numOfUsers => {
           if (numOfUsers.val() === 1) {
-            db.ref(`videoControllers/${currentLobbyId}/`).
+            videoControllersRef.
                 once('value').
                 then(lobbyInfo => {
-                  db.ref(`videoControllers/${currentLobbyId}/`).
+                  videoControllersRef.
                       update({
                         time: lobbyInfo.val().time +
                         ((Date.now() - lobbyInfo.val().updateTime) / 1000),
@@ -36,7 +37,7 @@ browser.runtime.onConnect.addListener(port => {
                       });
                 });
           }
-          db.ref(`videoControllers/${currentLobbyId}/`).
+          videoControllersRef.
               update({numOfUsers: numOfUsers.val() - 1});
         });
   });
@@ -48,47 +49,54 @@ browser.runtime.onConnect.addListener(port => {
           browser.storage.sync.set(objWithHistory);
         });
         currentLobbyId = message.payload.lobbyId;
-        db.ref(`videoControllers/${message.payload.lobbyId}/numOfUsers`).
+        videoControllersRef = db.ref(
+            `videoControllers/${message.payload.lobbyId}`);
+        videoControllersRef.child('numOfUsers').
             once('value').
             then(numOfUsers => {
               let currentIsPlaying;
-              db.ref(`videoControllers/${message.payload.lobbyId}/isPlaying`).
+              videoControllersRef.child('isPlaying').
                   on('value', isPlaying => {
                     currentIsPlaying = isPlaying.val();
-                    port.postMessage({
-                      type: VIDEO_CONTROL,
-                      payload: {isPlaying: currentIsPlaying},
-                    });
-                  });
-              db.ref(`videoControllers/${message.payload.lobbyId}/time`).
-                  on('value', time => {
-                    if (numOfUsers.val() === 0 || !currentIsPlaying) {
+                    if (currentIsPlaying !== videoState.isPlaying)
                       port.postMessage({
                         type: VIDEO_CONTROL,
-                        payload: {time: time.val()},
+                        payload: {isPlaying: currentIsPlaying},
                       });
-                    } else {
-                      db.ref(
-                          `videoControllers/${message.payload.lobbyId}/updateTime`).
-                          once('value').
-                          then(updateTime => {
-                            port.postMessage({
-                              type: VIDEO_CONTROL,
-                              payload: {
-                                time: time.val() +
-                                ((Date.now() - updateTime.val()) / 1000),
-                              },
+                  });
+              videoControllersRef.child('time').
+                  on('value', time => {
+                    if (videoState.time !== time.val()) {
+                      if (numOfUsers.val() === 0 || !currentIsPlaying) {
+                        port.postMessage({
+                          type: VIDEO_CONTROL,
+                          payload: {time: time.val()},
+                        });
+                      } else {
+                        videoControllersRef.child('updateTime').
+                            once('value').
+                            then(updateTime => {
+                              port.postMessage({
+                                type: VIDEO_CONTROL,
+                                payload: {
+                                  time: time.val() +
+                                  ((Date.now() - updateTime.val()) / 1000),
+                                },
+                              });
                             });
-                          });
+                      }
                     }
                   });
-              db.ref(`videoControllers/${message.payload.lobbyId}/numOfUsers`).
+              videoControllersRef.child('numOfUsers').
                   set(numOfUsers.val() + 1);
             });
         break;
       }
       case VIDEO_CONTROL: {
-        db.ref(`videoControllers/${currentLobbyId}/`).
+        videoState = Object.assign(videoState, message.payload);
+        videoState.updateTime = Date.now();
+        console.log(videoState);
+        videoControllersRef.
             update(Object.assign(message.payload, {updateTime: Date.now()}));
         break;
       }
@@ -104,7 +112,8 @@ browser.runtime.onMessage.addListener(message => {
           then(videoIdentity => {
             browser.storage.sync.get('lobbiesHistory', objWithHistory => {
               objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity = videoIdentity.val();
-              objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity.link = generateLink(videoIdentity.val());
+              objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity.link = generateLink(
+                  videoIdentity.val());
               browser.storage.sync.set(objWithHistory);
             });
           });
@@ -118,8 +127,9 @@ browser.runtime.onMessage.addListener(message => {
       break;
     }
     case CREATE_LOBBY: {
-      let newLobbyRef = db.ref("lobbies/").push({name: message.payload.name});
-      db.ref(`users/${userId}/lobbies/${newLobbyRef.key}`).set({name: message.payload.name});
+      let newLobbyRef = db.ref('lobbies/').push({name: message.payload.name});
+      db.ref(`users/${userId}/lobbies/${newLobbyRef.key}`).
+          set({name: message.payload.name});
       db.ref(`videoControllers/${newLobbyRef.key}/`).set({
         isPlaying: false,
         time: 0,
@@ -130,25 +140,33 @@ browser.runtime.onMessage.addListener(message => {
         objWithHistory.lobbiesHistory[newLobbyRef.key] = {name: message.payload.name};
         browser.storage.sync.set(objWithHistory);
       });
-      setLinkToLobby({lobbyId: newLobbyRef.key, videoIdentity: message.payload.videoIdentity, videoState: message.payload.videoState});
+      setLinkToLobby({
+        lobbyId: newLobbyRef.key,
+        videoIdentity: message.payload.videoIdentity,
+        videoState: message.payload.videoState,
+      });
       break;
     }
-    case NEW_VIDEO_TO_LOBBY:{
-      setLinkToLobby({lobbyId: message.payload.lobbyId, videoIdentity:message.payload.videoIdentity, videoState: message.payload.videoState});
+    case NEW_VIDEO_TO_LOBBY: {
+      setLinkToLobby({
+        lobbyId: message.payload.lobbyId,
+        videoIdentity: message.payload.videoIdentity,
+        videoState: message.payload.videoState,
+      });
       break;
     }
   }
 });
 
-function setLinkToLobby(linkInfo){
+function setLinkToLobby(linkInfo) {
   db.ref(`videoControllers/${linkInfo.lobbyId}/`).update(linkInfo.videoState);
   db.ref(`videos/${linkInfo.lobbyId}`).set(linkInfo.videoState);
 }
 
-function generateLink(videoIdentity){
-  let url = "";
-  switch(videoIdentity.hostname){
-    case "www.youtube.com":{
+function generateLink(videoIdentity) {
+  let url = '';
+  switch (videoIdentity.hostname) {
+    case 'www.youtube.com': {
       url += videoIdentity.hostname + '/watch?v=' + videoIdentity.v;
     }
   }
