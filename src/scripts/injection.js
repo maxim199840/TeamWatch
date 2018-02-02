@@ -55,7 +55,7 @@ console.info('Team Watch injected..');
       },
     });
 
-    setPlayerEventCallbacks();
+    setVideoEventCallbacks();
 
     browser.runtime.onMessage.addListener(onUnsync);
   }
@@ -96,12 +96,12 @@ console.info('Team Watch injected..');
       },
     });
 
-    setPlayerEventCallbacks();
+    setVideoEventCallbacks();
 
     browser.runtime.onMessage.addListener(onUnsync);
   }
 
-  function setPlayerEventCallbacks() {
+  function setVideoEventCallbacks() {
     video.onplay = () => {
       if (isProgramPlayAction) {
         console.log('Play is triggered by program.');
@@ -139,7 +139,6 @@ console.info('Team Watch injected..');
     video.onseeked = () => {
       if (isProgramSeekAction) {
         isProgramSeekAction = false;
-        return;
       }
 
       const payload = {
