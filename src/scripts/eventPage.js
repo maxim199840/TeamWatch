@@ -1,10 +1,10 @@
 import {browser} from '../browserApi';
 import {db} from '../firebaseController';
 import {
-  SYNC_WITH_LOBBY,
+  SYNC_LOBBY,
   VIDEO_CONTROL,
-  CONNECT_TO_LOBBY,
-  DISCONNECT_FROM_LOBBY,
+  CONNECT_LOBBY,
+  DISCONNECT_LOBBY,
   CREATE_LOBBY, NEW_VIDEO_TO_LOBBY,
 } from '../messageTypes';
 
@@ -43,7 +43,7 @@ browser.runtime.onConnect.addListener(port => {
   });
   port.onMessage.addListener(message => {
     switch (message.type) {
-      case SYNC_WITH_LOBBY: {
+      case SYNC_LOBBY: {
         browser.storage.sync.get('lobbiesHistory', objWithHistory => {
           objWithHistory.lobbiesHistory[message.payload.lobbyId].sync = true;
           browser.storage.sync.set(objWithHistory);
@@ -106,7 +106,7 @@ browser.runtime.onConnect.addListener(port => {
 
 browser.runtime.onMessage.addListener(message => {
   switch (message.type) {
-    case CONNECT_TO_LOBBY: {
+    case CONNECT_LOBBY: {
       db.ref(`videos/${message.payload.lobbyId}`).
           once('value').
           then(videoIdentity => {
@@ -119,7 +119,7 @@ browser.runtime.onMessage.addListener(message => {
           });
       break;
     }
-    case DISCONNECT_FROM_LOBBY: {
+    case DISCONNECT_LOBBY: {
       browser.storage.sync.get('lobbiesHistory', objWithHistory => {
         objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity = undefined;
         browser.storage.sync.set(objWithHistory);

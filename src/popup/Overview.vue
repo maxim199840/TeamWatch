@@ -24,6 +24,7 @@
             <h3 v-else>
                 {{lobbyDetails.name}}
                 <button @click="$emit('connect',lobbyId)">Connect</button>
+                <button @click="$emit('remove',lobbyId)">Remove</button>
             </h3>
         </div>
     </div>

@@ -10,7 +10,8 @@
                       @connect="connect"
                       @disconnect="disconnect"
                       @sync="sync"
-                      @unsync="unsync"/>
+                      @unsync="unsync"
+                      @remove="remove"/>
         </template>
     </div>
 </template>
@@ -20,11 +21,12 @@
   import Overview from './Overview';
   import {browser} from '../browserApi';
   import {
-    CONNECT_TO_LOBBY,
+    CONNECT_LOBBY,
     CREATE_LOBBY,
-    DISCONNECT_FROM_LOBBY,
-    SYNC_WITH_LOBBY,
-    UNSYNC_WITH_LOBBY,
+    DISCONNECT_LOBBY,
+    REMOVE_LOBBY,
+    SYNC_LOBBY,
+    UNSYNC_LOBBY,
   } from '../messageTypes';
 
   export default {
@@ -94,7 +96,7 @@
       },
       connect(lobbyId) {
         browser.runtime.sendMessage({
-          type: CONNECT_TO_LOBBY,
+          type: CONNECT_LOBBY,
           payload: {
             lobbyId,
           },
@@ -103,7 +105,7 @@
       disconnect(lobbyId) {
         this.unsync(lobbyId);
         browser.runtime.sendMessage({
-          type: DISCONNECT_FROM_LOBBY,
+          type: DISCONNECT_LOBBY,
           payload: {
             lobbyId,
           },
@@ -114,7 +116,7 @@
           chrome.tabs.sendMessage(
               tabs[0].id,
               {
-                type: SYNC_WITH_LOBBY,
+                type: SYNC_LOBBY,
                 payload: {
                   lobbyId,
                   videoIdentity: this.lobbiesHistory[lobbyId].videoIdentity,
@@ -133,7 +135,15 @@
       },
       unsync(lobbyId) {
         browser.tabs.query({}, tabs => {
-          tabs.forEach(tab => browser.tabs.sendMessage(tab.id, {type: UNSYNC_WITH_LOBBY, payload: {lobbyId}}));
+          tabs.forEach(tab => browser.tabs.sendMessage(tab.id, {type: UNSYNC_LOBBY, payload: {lobbyId}}));
+        });
+      },
+      remove(lobbyId) {
+        browser.runtime.sendMessage({
+          type: REMOVE_LOBBY,
+          payload: {
+            lobbyId,
+          },
         });
       },
     },

@@ -1,8 +1,8 @@
 import {browser} from '../browserApi';
 import {
   CREATE_LOBBY,
-  SYNC_WITH_LOBBY,
-  UNSYNC_WITH_LOBBY,
+  SYNC_LOBBY,
+  UNSYNC_LOBBY,
   VIDEO_CONTROL,
 } from '../messageTypes';
 
@@ -70,7 +70,7 @@ console.info('Team Watch injected..');
   }
 
   function onSync({type, payload}, sender, isSyncedCallback) {
-    if (type !== SYNC_WITH_LOBBY) return;
+    if (type !== SYNC_LOBBY) return;
 
     const isVideoIdentityMatched = matchVideoIdentity(payload.videoIdentity);
     if (!isVideoIdentityMatched) {
@@ -91,7 +91,7 @@ console.info('Team Watch injected..');
     port.onMessage.addListener(onVideoControl);
 
     port.postMessage({
-      type: SYNC_WITH_LOBBY,
+      type: SYNC_LOBBY,
       payload: {
         lobbyId: payload.lobbyId,
       },
@@ -204,7 +204,7 @@ console.info('Team Watch injected..');
   }
 
   function onUnsync({type, payload}) {
-    if (type !== UNSYNC_WITH_LOBBY || lobbyId !== payload.lobbyId) return;
+    if (type !== UNSYNC_LOBBY || lobbyId !== payload.lobbyId) return;
 
     browser.runtime.onMessage.removeListener(onUnsync);
 
