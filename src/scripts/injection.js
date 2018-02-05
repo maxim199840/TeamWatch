@@ -64,6 +64,13 @@ console.info('Team Watch injected..');
 
     port.onMessage.addListener(onVideoControl);
 
+    port.postMessage({
+      type: SYNC_LOBBY,
+      payload: {
+        lobbyId,
+      },
+    });
+
     setVideoEventCallbacks();
 
     browser.runtime.onMessage.addListener(onUnsync);
@@ -93,7 +100,7 @@ console.info('Team Watch injected..');
     port.postMessage({
       type: SYNC_LOBBY,
       payload: {
-        lobbyId: payload.lobbyId,
+        lobbyId,
       },
     });
 
