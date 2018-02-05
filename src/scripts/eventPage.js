@@ -9,9 +9,10 @@ import {
 } from '../messageTypes';
 
 const userId = 'userId1';
-db.ref(`users/${userId}/lobbies`).once('value').then(lobbiesHistory => {
+db.ref(`users/${userId}/lobbies`).on('value', lobbiesHistory => {
   console.log(lobbiesHistory.val());
-  browser.storage.sync.set({lobbiesHistory: lobbiesHistory.val()});
+  let userLobbiesHistory = lobbiesHistory.val() ? lobbiesHistory.val() : {};
+  browser.storage.sync.set({lobbiesHistory: userLobbiesHistory});
 });
 
 browser.runtime.onConnect.addListener(port => {
@@ -112,7 +113,10 @@ browser.runtime.onConnect.addListener(port => {
           numOfUsers: 0,
         });
         browser.storage.sync.get('lobbiesHistory', objWithHistory => {
-          objWithHistory.lobbiesHistory[newLobbyRef.key] = {name: message.payload.name};
+          objWithHistory.lobbiesHistory[newLobbyRef.key] = {
+            name: message.payload.name,
+            videoIdentity: message.payload.videoIdentity,
+          };
           browser.storage.sync.set(objWithHistory);
         });
         setLinkToLobby({
@@ -120,7 +124,8 @@ browser.runtime.onConnect.addListener(port => {
           videoIdentity: message.payload.videoIdentity,
           videoState: message.payload.videoState,
         });
-        setTimeout(port.postMessage({type: CREATE_LOBBY, payload: {lobbyId: newLobbyRef.key}}), 500);
+        setTimeout(port.postMessage(
+            {type: CREATE_LOBBY, payload: {lobbyId: newLobbyRef.key}}), 500);
         break;
       }
       case NEW_VIDEO_TO_LOBBY: {
@@ -138,16 +143,7 @@ browser.runtime.onConnect.addListener(port => {
 browser.runtime.onMessage.addListener(message => {
   switch (message.type) {
     case CONNECT_LOBBY: {
-      db.ref(`videos/${message.payload.lobbyId}`).
-          once('value').
-          then(videoIdentity => {
-            browser.storage.sync.get('lobbiesHistory', objWithHistory => {
-              objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity = videoIdentity.val();
-              objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity.link = generateLink(
-                  videoIdentity.val());
-              browser.storage.sync.set(objWithHistory);
-            });
-          });
+      connectLobby(message);
       break;
     }
     case DISCONNECT_LOBBY: {
@@ -168,6 +164,19 @@ browser.runtime.onMessage.addListener(message => {
   }
 });
 
+function connectLobby(message) {
+  db.ref(`videos/${message.payload.lobbyId}`).
+      once('value').
+      then(videoIdentity => {
+        browser.storage.sync.get('lobbiesHistory', objWithHistory => {
+          objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity = videoIdentity.val();
+          objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity.link = generateLink(
+              videoIdentity.val());
+          browser.storage.sync.set(objWithHistory);
+        });
+      });
+}
+
 function setLinkToLobby(linkInfo) {
   db.ref(`videoControllers/${linkInfo.lobbyId}/`).update(linkInfo.videoState);
   db.ref(`videos/${linkInfo.lobbyId}`).set(linkInfo.videoIdentity);
@@ -177,10 +186,37 @@ function generateLink(videoIdentity) {
   let url = '';
   switch (videoIdentity.hostname) {
     case 'www.youtube.com': {
-      url += videoIdentity.hostname + '/watch?v=' + videoIdentity.v;
+      url += 'https://' + videoIdentity.hostname + '/watch?v=' + videoIdentity.v;
     }
   }
   return url;
+}
+
+browser.tabs.onCreated.addListener(tab => {
+  addLobbyToHistory(tab);
+});
+
+browser.tabs.onUpdated.addListener((id, change, tab) => {
+  addLobbyToHistory(tab);
+});
+
+function addLobbyToHistory(tab) {
+  let currentURL = new URL(tab.url);
+  if (currentURL.hostname === 'team.watch') {
+    let lobbyId = currentURL.pathname.slice(1);
+    db.ref(`lobbies/${lobbyId}`).
+        once('value').
+        then(lobbyInfo => {
+          db.ref(`users/${userId}/lobbies/${lobbyId}`).
+              set({name: lobbyInfo.val().name});
+          connectLobby({payload: {lobbyId}});
+          db.ref(`videos/${lobbyId}`).
+              once('value').
+              then(videoIdentity => {
+                browser.tabs.update({url: generateLink(videoIdentity.val())});
+              });
+        });
+  }
 }
 
 // let connectedLobbyRef = {};
