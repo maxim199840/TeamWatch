@@ -19,7 +19,12 @@ if (location.pathname.match(/\/auth\.html.*/)) {
     callbacks: {
       signInSuccess: function(user, credential) {
         console.log(user, credential);
-        browser.storage.sync.set({user: {email: user.email}});
+        browser.storage.sync.set({
+          user: {
+            email: user.email,
+            displayName: user.displayName,
+          },
+        });
         return false;
       },
       signInFailure: function(error) {
