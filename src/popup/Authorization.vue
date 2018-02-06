@@ -1,27 +1,18 @@
 <template>
     <div>
-        <label>
-            User id:
-            <input type="text" v-model="userId"/>
-        </label>
-        <br>
-        <button @click="loginClick">Login</button>
+        <button @click="onSignIn">Sign in</button>
     </div>
 </template>
 
 <script>
+  import {browser} from '../browserApi';
+  import {SIGN_IN} from '../messageTypes';
+
   export default {
     name: 'authorization',
-    data() {
-      return {
-        userId: null,
-      };
-    },
     methods: {
-      loginClick({target: {value}}) {
-        this.$emit('login', {
-          userId: value,
-        });
+      onSignIn() {
+        browser.runtime.sendMessage({type: SIGN_IN});
       },
     },
   };

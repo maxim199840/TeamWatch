@@ -1,3 +1,4 @@
+export const SIGN_IN = 'SIGN_IN';
 export const CREATE_LOBBY = 'CREATE_LOBBY';
 export const NEW_VIDEO_TO_LOBBY = 'NEW_VIDEO_TO_LOBBY';
 export const CONNECT_LOBBY = 'CONNECT_LOBBY';
