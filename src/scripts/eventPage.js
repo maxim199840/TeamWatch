@@ -25,10 +25,12 @@ if (location.pathname.match(/\/auth\.html.*/)) {
             displayName: user.displayName,
           },
         });
+        window.close();
         return false;
       },
       signInFailure: function(error) {
         console.log(error);
+        window.close();
       },
     },
     signInFlow: 'popup',

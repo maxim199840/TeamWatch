@@ -2,22 +2,29 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Team Watch</title>
+    <title>Sign in Team Watch</title>
     <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/2.5.1/firebaseui.css"/>
     <script src="eventPage.js" defer></script>
     <style>
         body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
             font-family: 'Avenir', Helvetica, Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            margin: 50px 10px;
             color: #678;
-            text-align: center;
+        }
+
+        #auth {
+            width: 100vw;
         }
     </style>
 </head>
 <body>
-<h1>Welcome to Awesome Extension</h1>
 <div id="auth"></div>
 </body>
 </html>
