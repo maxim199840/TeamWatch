@@ -12,17 +12,17 @@
         <div class="lobby-item" v-for="lobby in sortedLobbies" :key="lobby.id">
             {{lobby.name}}
             <template v-if="!lobby.isConnected">
-                <button class="btn green" @click="connect">Connect</button>
-                <button class="btn red" @click="remove">Remove</button>
+                <button class="btn green" @click="connect(lobby.id)">Connect</button>
+                <button class="btn red" @click="remove(lobby.id)">Remove</button>
             </template>
             <template v-else>
                 <template v-if="!lobby.isSynced">
-                    <button class="btn blue" @click="sync">Sync</button>
+                    <button class="btn blue" @click="sync(lobby.id)">Sync</button>
                 </template>
                 <template v-else>
-                    <button class="btn blue" @click="unsync">Unsync</button>
+                    <button class="btn blue" @click="unsync(lobby.id)">Unsync</button>
                 </template>
-                <button class="btn red" @click="disconnect">Disconnect</button>
+                <button class="btn red" @click="disconnect(lobby.id)">Disconnect</button>
             </template>
         </div>
     </div>
