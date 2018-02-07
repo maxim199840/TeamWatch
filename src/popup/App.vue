@@ -11,6 +11,7 @@
         </div>
         <div class="lobby-item" v-for="lobby in sortedLobbies" :key="lobby.id">
             {{lobby.name}}
+            <button class="btn" id="copy-link" @click="copyLink(lobby.id)">Copy link</button>
             <template v-if="!lobby.isConnected">
                 <button class="btn green" @click="connect(lobby.id)">Connect</button>
                 <button class="btn red" @click="remove(lobby.id)">Remove</button>
@@ -29,6 +30,7 @@
 </template>
 
 <script>
+  import copy from 'copy-text-to-clipboard';
   import {browser} from '../browserApi';
   import {
     CONNECT_LOBBY,
@@ -72,6 +74,7 @@
           this.user = user.newValue;
         if (lobbiesHistory)
           this.lobbiesHistory = lobbiesHistory.newValue;
+        console.log(lobbiesHistory);
       });
     },
     methods: {
@@ -99,6 +102,9 @@
               },
           );
         });
+      },
+      copyLink(lobbyId) {
+        copy(`team.watch/${lobbyId}`);
       },
       connect(lobbyId) {
         browser.runtime.sendMessage({

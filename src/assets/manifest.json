@@ -13,7 +13,7 @@
     "tabs",
     "https://www.youtube.com/*"
   ],
-  "content_security_policy": "script-src https://*.firebaseio.com https://apis.google.com; object-src",
+  "content_security_policy": "script-src 'unsafe-eval' https://*.firebaseio.com https://apis.google.com; object-src",
   "browser_action": {
     "default_title": "Team Watch",
     "default_popup": "popup.html"
@@ -21,7 +21,7 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*/*"
+        "https://www.youtube.com/*"
       ],
       "js": [
         "injection.js"
