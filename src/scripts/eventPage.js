@@ -105,6 +105,7 @@ if (location.pathname.match(/\/auth\.html.*/)) {
     } else browser.storage.sync.set({lobbiesHistory: {}});
   });
   browser.storage.onChanged.addListener(({user}) => {
+    if (!user) return;
     if (!user.newValue) {
       browser.storage.sync.set({lobbiesHistory: {}});
       return;
@@ -327,6 +328,8 @@ if (location.pathname.match(/\/auth\.html.*/)) {
     if (tab.url.match('chrome-extension://')) return;
     let currentURL = new URL(tab.url);
     if (currentURL.hostname === 'team.watch') {
+      browser.tabs.update(
+          {url: './loading.html'});
       let lobbyId = currentURL.pathname.slice(1);
       db.ref(`lobbies/${lobbyId}`).
           once('value').
@@ -338,7 +341,21 @@ if (location.pathname.match(/\/auth\.html.*/)) {
                 once('value').
                 then(videoIdentity => {
                   browser.tabs.update(
-                      {url: generateLink(videoIdentity.val())});
+                      {url: generateLink(videoIdentity.val())}, () => {
+                        {
+                          setTimeout(() => {
+                            browser.tabs.sendMessage(
+                                tab.id,
+                                {
+                                  type: SYNC_LOBBY,
+                                  payload: {
+                                    lobbyId,
+                                    videoIdentity: videoIdentity.val(),
+                                  },
+                                });
+                          }, 2000);
+                        }
+                      });
                 });
           });
     }
