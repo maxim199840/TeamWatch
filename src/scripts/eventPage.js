@@ -94,15 +94,21 @@ if (location.pathname.match(/\/auth\.html.*/)) {
 
   let userId = null;
   browser.storage.sync.get('user', ({user}) => {
-    if (user) userId = user.uid;
-    db.ref(`users/${userId}/lobbies`).once('value').then(lobbiesHistory => {
-      let userLobbiesHistory = lobbiesHistory.val() ? lobbiesHistory.val() : {};
-      browser.storage.sync.set({lobbiesHistory: userLobbiesHistory});
-    });
+    if (user) {
+      userId = user.uid;
+      db.ref(`users/${userId}/lobbies`).once('value').then(lobbiesHistory => {
+        let userLobbiesHistory = lobbiesHistory.val() ?
+            lobbiesHistory.val() :
+            {};
+        browser.storage.sync.set({lobbiesHistory: userLobbiesHistory});
+      });
+    } else browser.storage.sync.set({lobbiesHistory: {}});
   });
   browser.storage.onChanged.addListener(({user}) => {
-    if (!user || !user.newValue) return;
-    console.log(user);
+    if (!user||!user.newValue) {
+      browser.storage.sync.set({lobbiesHistory: {}});
+      return;
+    }
     userId = user.newValue.uid;
     db.ref(`users/${userId}/lobbies`).on('value', lobbiesHistory => {
       if (!lobbiesHistory.val()) {
@@ -275,14 +281,17 @@ if (location.pathname.match(/\/auth\.html.*/)) {
         once('value').
         then(videoIdentity => {
           browser.storage.sync.get('lobbiesHistory', objWithHistory => {
-            db.ref('lobbies').child(message.payload.lobbyId).once('value').then(lobbyInfo=>{
-              objWithHistory.lobbiesHistory[message.payload.lobbyId] = {name: lobbyInfo.val().name};
-              objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity = videoIdentity.val();
-              objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity.link = generateLink(
-                  videoIdentity.val());
-              console.log(objWithHistory);
-              browser.storage.sync.set(objWithHistory);
-            });
+            db.ref('lobbies').
+                child(message.payload.lobbyId).
+                once('value').
+                then(lobbyInfo => {
+                  objWithHistory.lobbiesHistory[message.payload.lobbyId] = {name: lobbyInfo.val().name};
+                  objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity = videoIdentity.val();
+                  objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity.link = generateLink(
+                      videoIdentity.val());
+                  console.log(objWithHistory);
+                  browser.storage.sync.set(objWithHistory);
+                });
 
           });
         });
@@ -314,7 +323,7 @@ if (location.pathname.match(/\/auth\.html.*/)) {
   });
 
   function addLobbyToHistory(tab) {
-    //if (tab.url.match(/chrome-extension:\/\//) !== '') return;
+    if (tab.url.match(/chrome-extension:\/\//)) return;
     let currentURL = new URL(tab.url);
     if (currentURL.hostname === 'team.watch') {
       let lobbyId = currentURL.pathname.slice(1);
