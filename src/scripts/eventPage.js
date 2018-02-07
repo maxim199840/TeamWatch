@@ -105,7 +105,7 @@ if (location.pathname.match(/\/auth\.html.*/)) {
     } else browser.storage.sync.set({lobbiesHistory: {}});
   });
   browser.storage.onChanged.addListener(({user}) => {
-    if (!user||!user.newValue) {
+    if (!user.newValue) {
       browser.storage.sync.set({lobbiesHistory: {}});
       return;
     }
@@ -323,7 +323,7 @@ if (location.pathname.match(/\/auth\.html.*/)) {
   });
 
   function addLobbyToHistory(tab) {
-    if (tab.url.match(/chrome-extension:\/\//)) return;
+    if (tab.url.match('chrome-extension://')) return;
     let currentURL = new URL(tab.url);
     if (currentURL.hostname === 'team.watch') {
       let lobbyId = currentURL.pathname.slice(1);
