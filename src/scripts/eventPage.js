@@ -23,6 +23,7 @@ if (location.pathname.match(/\/auth\.html.*/)) {
           user: {
             uid: user.uid,
             displayName: user.displayName,
+            photo: user.photoURL,
           },
         });
         window.close();

@@ -1,14 +1,22 @@
 <template>
     <div id="app">
-        <div class="dashboard">
+        <header class=dashboard>
+            <img class="project-icon" src="../assets/video-camera.svg"/>
+            <span class="project-name">Team Watch</span>
             <template v-if="!user">
-                <button class="btn" @click="signIn">Sign in</button>
+                <button class="right-bar user-btn user-img" @click="signIn"></button>
             </template>
             <template v-else>
-                <button class="btn" @click="create">Create lobby</button>
-                <button class="btn" @click="signOut">Sign out</button>
+                <div class="right-bar">
+                    <button class="user-btn add-btn" @click="create" title="Create new lobby."></button>
+                    <button class="user-btn user-img"
+                            :style="user.photo ? { 'background-image': 'url(' + user.photo +')'}:''"
+                            @click="signOut" title="Sign out"></button>
+
+                </div>
             </template>
-        </div>
+        </header>
+
         <div class="lobby-item" v-for="lobby in sortedLobbies" :key="lobby.id">
             {{lobby.name}}
             <button class="btn" id="copy-link" @click="copyLink(lobby.id)">Copy link</button>
@@ -161,22 +169,29 @@
 </script>
 
 <style>
+    header {
+        margin-top: 2px;
+        background-color: #12425a;
+        height: 40px;
+        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
+    }
+
     body {
         margin: 0;
     }
 
     #app {
-        font-family: 'Avenir', Helvetica, Arial, sans-serif;
+        font-family: 'Roboto', Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         color: #2c3e50;
         width: 320px;
+        height: 360px;
     }
 
     .dashboard {
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
     }
 
     .btn {
@@ -207,11 +222,52 @@
         width: 100%;
         height: 40px;
         padding: 0 10px;
-        border: solid lightgray;
-        border-width: 1px 0 0;
+        /*border: solid lightgray;*/
+        /*border-width: 1px 0 0;*/
     }
 
     .lobby-item:hover {
         background: #f4f4f4;
+    }
+
+    .right-bar {
+        position: absolute;
+        right: 7px;
+        top: 8px;
+    }
+
+    .user-btn {
+        border-radius: 50%;
+        height: 26px;
+        width: 26px;
+        border: 0;
+    }
+
+    .user-img {
+        background: center url("../assets/user.svg");
+        background-size: 26px 26px;
+        border: 2px solid white;
+    }
+
+    .add-btn {
+        margin-top: 1px;
+        border: 2px solid transparent;
+        background: center url('../assets/add.svg');
+        background-color: transparent;
+        background-size: 22px 22px;
+        background-repeat: no-repeat;
+        margin-right: 5px;
+    }
+
+    .project-icon {
+        margin: 5px;
+        height: 28px;
+        width: 40px;
+    }
+
+    .project-name {
+        margin-top: 10px;
+        font-size: 23px;
+        color: white;
     }
 </style>
