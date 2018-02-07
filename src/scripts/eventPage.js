@@ -127,10 +127,7 @@ if (location.pathname.match(/\/auth\.html.*/)) {
     let currentLobbyId = null, videoControllersRef,
         videoState = {isPlaying: false, time: 0};
     port.onDisconnect.addListener(() => {
-      browser.storage.sync.get('lobbiesHistory', objWithHistory => {
-        objWithHistory.lobbiesHistory[currentLobbyId].sync = false;
-        browser.storage.sync.set(objWithHistory);
-      });
+
       videoControllersRef.child('numOfUsers').
           once('value').
           then(numOfUsers => {
@@ -149,15 +146,15 @@ if (location.pathname.match(/\/auth\.html.*/)) {
             }
             videoControllersRef.
                 update({numOfUsers: numOfUsers.val() - 1});
+            browser.storage.sync.get('lobbiesHistory', objWithHistory => {
+              objWithHistory.lobbiesHistory[currentLobbyId].sync = false;
+              browser.storage.sync.set(objWithHistory);
+            });
           });
     });
     port.onMessage.addListener(message => {
       switch (message.type) {
         case SYNC_LOBBY: {
-          browser.storage.sync.get('lobbiesHistory', objWithHistory => {
-            objWithHistory.lobbiesHistory[message.payload.lobbyId].sync = true;
-            browser.storage.sync.set(objWithHistory);
-          });
           currentLobbyId = message.payload.lobbyId;
           videoControllersRef = db.ref(
               `videoControllers/${message.payload.lobbyId}`);
@@ -199,6 +196,10 @@ if (location.pathname.match(/\/auth\.html.*/)) {
                     });
                 videoControllersRef.child('numOfUsers').
                     set(numOfUsers.val() + 1);
+                browser.storage.sync.get('lobbiesHistory', objWithHistory => {
+                  objWithHistory.lobbiesHistory[message.payload.lobbyId].sync = true;
+                  browser.storage.sync.set(objWithHistory);
+                });
               });
           break;
         }
