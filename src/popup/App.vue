@@ -3,31 +3,34 @@
         <header class=dashboard>
             <img class="project-icon" src="../assets/video-camera.svg"/>
             <p class="project-name">Team Watch</p>
-            <template v-if="!user">
-                <button class="right-bar user-btn user-img" @click="signIn"></button>
-            </template>
-            <template v-else>
-                <div class="right-bar">
-                    <button class="user-btn add-btn" @click="create" title="Create new lobby."></button>
-                    <button class="user-btn user-img logout-btn"
-                            :style="user.photo ? { 'background-image': 'url(' + user.photo +')'}:''"
+            <div class="right-bar">
+                <template v-if="!user">
+                    <button class="round-btn user-back" @click="signIn"></button>
+                </template>
+                <template v-else>
+                    <button class="round-btn add-back" @click="create" title="Create new lobby."></button>
+                    <button class="round-btn user-back logout-back"
                             @click="signOut" title="Sign out"></button>
-
-                </div>
-            </template>
+                </template>
+            </div>
         </header>
         <div class="lobby-list">
             <div class="lobby-list-item" v-for="lobby in sortedLobbies" :key="lobby.id">
                 <span class="lobby-name">{{lobby.name}}</span>
-                <button class="btn copy-back" style="margin-left: auto" @click="copyLink(lobby.id)" title="Copy link to lobby."></button>
+                <button class="btn copy-back" style="margin-left: auto" @click="copyLink(lobby.id)"
+                        title="Copy link to lobby."></button>
                 <template v-if="!lobby.isConnected">
                     <button class="btn green-back" @click="connect(lobby.id)" title="Connect to lobby.">Connect</button>
                     <button class="btn red-back" @click="remove(lobby.id)" title="Remove lobby.">Remove</button>
                 </template>
                 <template v-else>
-                    <button v-if="!lobby.isSynced" class="btn blue-back" @click="sync(lobby.id)" title="Sync video with lobby.">Sync</button>
+                    <button v-if="!lobby.isSynced" class="btn blue-back" @click="sync(lobby.id)"
+                            title="Sync video with lobby.">Sync
+                    </button>
                     <button v-else class="btn blue-back" @click="unsync(lobby.id)" title="Unsync video.">Unsync</button>
-                    <button class="btn red-back" @click="disconnect(lobby.id)" title="Disconnect from lobby.">Disconnect</button>
+                    <button class="btn red-back" @click="disconnect(lobby.id)" title="Disconnect from lobby.">
+                        Disconnect
+                    </button>
                 </template>
             </div>
         </div>
@@ -169,13 +172,6 @@
 </script>
 
 <style>
-    header {
-        margin-top: 2px;
-        background-color: #2c3e50;
-        height: 40px;
-        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
-    }
-
     body {
         margin: 0;
     }
@@ -191,22 +187,25 @@
 
     .dashboard {
         display: flex;
+        margin-top: 3px;
+        background-color: #2c3e50;
+        height: 40px;
+        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
         flex-direction: row;
     }
 
     .lobby-list-item {
         display: flex;
         width: 100%;
-        height: 40px;
+        height: 39px;
         flex-direction: row;
         align-items: center;
         border-bottom: 1px solid #ebebeb;
     }
 
     .lobby-list-item:hover {
-        background: #f6f6f6;
-        box-shadow: 0 0 4px 2px rgba(0, 0, 0, 0.18), 0 0 6px 4px rgba(0, 0, 0, 0.17);
-        margin: 0 1px;
+        background: #f8f8f8;
+        box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.14), 0 0 6px 4px rgba(0, 0, 0, 0.13);
     }
 
     .lobby-name {
@@ -216,6 +215,7 @@
         width: 120px;
         height: 26px;
         text-overflow: ellipsis;
+        cursor: default;
     }
 
     .btn {
@@ -225,6 +225,7 @@
         border: 0;
         background: #ddd;
         border-radius: 4px;
+        cursor: pointer;
     }
 
     .green-back {
@@ -248,30 +249,27 @@
     .right-bar {
         position: absolute;
         right: 7px;
-        top: 8px;
+        top: 9px;
     }
 
-    .user-btn {
+    .round-btn {
+        margin: 0 4px;
         border-radius: 50%;
         height: 26px;
         width: 26px;
-        border: 0;
-    }
-
-    .user-img {
-        background: center url("../assets/user.svg");
-        background-size: 26px 26px;
-        border: 2px solid white;
-    }
-
-    .add-btn {
-        margin-top: 1px;
         border: 2px solid transparent;
-        background: center url('../assets/add.svg');
-        background-color: transparent;
-        background-size: 22px 22px;
-        background-repeat: no-repeat;
-        margin-right: 5px;
+        cursor: pointer;
+    }
+
+    .user-back {
+        background: center url(../assets/user.svg);
+        background-size: 26px 26px;
+        border-color: white;
+    }
+
+    .add-back {
+        background: url(../assets/add.svg) no-repeat center;
+        background-size: 90% 90%;
     }
 
     .project-icon {
@@ -284,11 +282,12 @@
         margin-top: 10px;
         font-size: 23px;
         color: white;
+        cursor: default;
     }
 
     .lobby-list {
         overflow: auto;
-        overflow-x:hidden;
+        overflow-x: hidden;
         height: 100%;
         width: 100%;
     }
@@ -303,8 +302,9 @@
         background-color: #727272;
     }
 
-    .logout-btn:hover {
+    .logout-back:hover {
         background: url(../assets/logout.svg) no-repeat center;
-        background-size: 22px 22px;
+        background-size: 90% 90%;
+        border-color: transparent;
     }
 </style>
