@@ -100,7 +100,6 @@
               tab.id,
               {
                 type: CREATE_LOBBY,
-                payload: {name: tab.title},
               },
               isCreated => {
                 if (isCreated)
