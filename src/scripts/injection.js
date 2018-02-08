@@ -60,7 +60,7 @@ console.info('Team Watch injected..');
     port.postMessage({
       type: CREATE_LOBBY,
       payload: {
-        name: payload.name,
+        name: document.getElementsByClassName('title')[0].innerHTML,
         videoIdentity,
         videoState: {
           isPlaying: !video.paused,
