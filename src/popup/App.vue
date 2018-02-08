@@ -210,7 +210,7 @@
         overflow: hidden;
         margin: 5px 9px 5px;
         font-size: unset;
-        width: 120px;
+        width: 200px;
         height: 26px;
         text-overflow: ellipsis;
         cursor: default;
@@ -224,18 +224,6 @@
         background: #ddd;
         border-radius: 4px;
         cursor: pointer;
-    }
-
-    .green-back {
-        background-color: #8e9;
-    }
-
-    .red-back {
-        background-color: #e98;
-    }
-
-    .blue-back {
-        background-color: #9ce;
     }
 
     .copy-back {
