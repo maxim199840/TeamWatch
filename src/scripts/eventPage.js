@@ -263,7 +263,7 @@ if (location.pathname.match(/\/auth\.html.*/)) {
       }
       case DISCONNECT_LOBBY: {
         browser.storage.sync.get('lobbiesHistory', objWithHistory => {
-          objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity = undefined;
+          delete objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity;
           browser.storage.sync.set(objWithHistory);
         });
         break;

@@ -2,7 +2,7 @@
     <div id="app">
         <header class=dashboard>
             <img class="project-icon" src="../assets/video-camera.svg"/>
-            <span class="project-name">Team Watch</span>
+            <p class="project-name">Team Watch</p>
             <template v-if="!user">
                 <button class="right-bar user-btn user-img" @click="signIn"></button>
             </template>
@@ -210,8 +210,12 @@
     }
 
     .lobby-name {
-        margin: 0 9px 0;
-        font-size: medium;
+        overflow: hidden;
+        margin: 5px 9px 5px;
+        font-size: unset;
+        width: 120px;
+        height: 30px;
+        text-overflow: ellipsis;
     }
 
     .btn {
