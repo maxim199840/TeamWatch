@@ -53,7 +53,7 @@ console.info('Team Watch injected..');
     video = getVideo();
 
     port = browser.runtime.connect();
-    port.onDisconnect(reset);
+    port.onDisconnect.addListener(reset);
 
     port.onMessage.addListener(onCreatedLobbyIdGenerated);
 
@@ -81,9 +81,7 @@ console.info('Team Watch injected..');
 
     port.postMessage({
       type: SYNC_LOBBY,
-      payload: {
-        lobbyId,
-      },
+      payload: {lobbyId},
     });
 
     setVideoEventCallbacks();
@@ -111,7 +109,7 @@ console.info('Team Watch injected..');
 
     if (!port) {
       port = browser.runtime.connect();
-      port.onDisconnect(reset);
+      port.onDisconnect.addListener(reset);
     }
 
     port.onMessage.addListener(onVideoControl);
@@ -120,6 +118,7 @@ console.info('Team Watch injected..');
       type: SYNC_LOBBY,
       payload: {
         lobbyId,
+        title: document.title,
       },
     });
 

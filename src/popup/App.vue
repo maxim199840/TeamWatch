@@ -17,21 +17,17 @@
             </template>
         </header>
 
-        <div class="lobby-item" v-for="lobby in sortedLobbies" :key="lobby.id">
-            {{lobby.name}}
-            <button class="btn" id="copy-link" @click="copyLink(lobby.id)">Copy link</button>
+        <div class="lobby-list-item" v-for="lobby in sortedLobbies" :key="lobby.id">
+            <span class="lobby-name">{{lobby.name}}</span>
+            <button class="btn copy-back" style="margin-left: auto" @click="copyLink(lobby.id)"></button>
             <template v-if="!lobby.isConnected">
-                <button class="btn green" @click="connect(lobby.id)">Connect</button>
-                <button class="btn red" @click="remove(lobby.id)">Remove</button>
+                <button class="btn green-back" @click="connect(lobby.id)">Connect</button>
+                <button class="btn red-back" @click="remove(lobby.id)">Remove</button>
             </template>
             <template v-else>
-                <template v-if="!lobby.isSynced">
-                    <button class="btn blue" @click="sync(lobby.id)">Sync</button>
-                </template>
-                <template v-else>
-                    <button class="btn blue" @click="unsync(lobby.id)">Unsync</button>
-                </template>
-                <button class="btn red" @click="disconnect(lobby.id)">Disconnect</button>
+                <button v-if="!lobby.isSynced" class="btn blue-back" @click="sync(lobby.id)">Sync</button>
+                <button v-else class="btn blue-back" @click="unsync(lobby.id)">Unsync</button>
+                <button class="btn red-back" @click="disconnect(lobby.id)">Disconnect</button>
             </template>
         </div>
     </div>
@@ -60,9 +56,14 @@
     },
     computed: {
       sortedLobbies() {
+        console.log(this.lobbiesHistory);
         return Object.entries(this.lobbiesHistory).
             map(([id, details]) =>
-                Object.assign({}, details, {id, isConnected: !!details.videoIdentity, isSynced: !!details.sync})).
+                Object.assign({}, details, {
+                  id,
+                  isConnected: details.hasOwnProperty('videoIdentity'),
+                  isSynced: details.hasOwnProperty('tabId'),
+                })).
             sort((lobby1, lobby2) => {
               if (lobby2.isConnected - lobby1.isConnected !== 0)
                 return lobby2.isConnected - lobby1.isConnected;
@@ -93,14 +94,13 @@
         this.user = null;
         browser.storage.sync.set({user: null});
       },
-      create(name) {
-        name = `Lobby #${Math.floor(Math.random() * 999)}`;
-        browser.tabs.query({active: true, currentWindow: true}, tabs => {
+      create() {
+        browser.tabs.query({active: true, currentWindow: true}, ([tab]) => {
           browser.tabs.sendMessage(
-              tabs[0].id,
+              tab.id,
               {
                 type: CREATE_LOBBY,
-                payload: {name},
+                payload: {name: tab.title},
               },
               isCreated => {
                 if (isCreated)
@@ -171,7 +171,7 @@
 <style>
     header {
         margin-top: 2px;
-        background-color: #12425a;
+        background-color: #2c3e50;
         height: 40px;
         box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
     }
@@ -194,40 +194,51 @@
         flex-direction: row;
     }
 
-    .btn {
-        height: 26px;
-        margin: 7px;
-        border: 0;
-        background: #ddd;
-        opacity: 1;
-    }
-
-    .btn:hover {
-        opacity: 0.7;
-    }
-
-    .green {
-        background: #8e8;
-    }
-
-    .red {
-        background: #f99;
-    }
-
-    .blue {
-        background: #acf;
-    }
-
-    .lobby-item {
+    .lobby-list-item {
+        display: flex;
         width: 100%;
         height: 40px;
-        padding: 0 10px;
-        /*border: solid lightgray;*/
-        /*border-width: 1px 0 0;*/
+        flex-direction: row;
+        align-items: center;
+        border-bottom: 1px solid #ebebeb;
     }
 
-    .lobby-item:hover {
-        background: #f4f4f4;
+    .lobby-list-item:hover {
+        background: #f6f6f6;
+        box-shadow: 0 0 4px 2px rgba(0, 0, 0, 0.18), 0 0 6px 4px rgba(0, 0, 0, 0.17);
+        margin: 0 1px;
+    }
+
+    .lobby-name {
+        margin: 0 9px 0;
+        font-size: medium;
+    }
+
+    .btn {
+        flex-shrink: 1;
+        height: 26px;
+        margin: 0 7px 0 0;
+        border: 0;
+        background: #ddd;
+        border-radius: 4px;
+    }
+
+    .green-back {
+        background: #8e9;
+    }
+
+    .red-back {
+        background: #e98;
+    }
+
+    .blue-back {
+        background: #9ce;
+    }
+
+    .copy-back {
+        width: 26px;
+        background: url(../assets/share.svg) no-repeat center;
+        background-size: 22px 22px;
     }
 
     .right-bar {
