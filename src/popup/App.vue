@@ -52,11 +52,11 @@
       return {
         user: null,
         lobbiesHistory: {},
+        currentTabId: null,
       };
     },
     computed: {
       sortedLobbies() {
-        console.log(this.lobbiesHistory);
         return Object.entries(this.lobbiesHistory).
             map(([id, details]) =>
                 Object.assign({}, details, {
@@ -73,7 +73,9 @@
             });
       },
     },
-    mounted() {
+    beforeCreate() {
+      browser.tabs.onActivated.addListener(({tabId}) => this.currentTabId = tabId);
+      browser.tabs.query({active: true, currentWindow: true}, ([tab]) => this.currentTabId = tab.id);
       browser.storage.sync.get(['user', 'lobbiesHistory'], ({user, lobbiesHistory}) => {
         this.user = user;
         this.lobbiesHistory = lobbiesHistory || {};
@@ -98,9 +100,7 @@
         browser.tabs.query({active: true, currentWindow: true}, ([tab]) => {
           browser.tabs.sendMessage(
               tab.id,
-              {
-                type: CREATE_LOBBY,
-              },
+              {type: CREATE_LOBBY},
               isCreated => {
                 if (isCreated)
                   console.log('Created!');
@@ -127,9 +127,9 @@
         });
       },
       sync(lobbyId) {
-        browser.tabs.query({active: true, currentWindow: true}, tabs => {
+        browser.tabs.query({active: true, currentWindow: true}, ([tab]) => {
           browser.tabs.sendMessage(
-              tabs[0].id,
+              tab.id,
               {
                 type: SYNC_LOBBY,
                 payload: {
