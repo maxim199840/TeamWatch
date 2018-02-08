@@ -9,7 +9,7 @@
             <template v-else>
                 <div class="right-bar">
                     <button class="user-btn add-btn" @click="create" title="Create new lobby."></button>
-                    <button class="user-btn user-img"
+                    <button class="user-btn user-img logout-btn"
                             :style="user.photo ? { 'background-image': 'url(' + user.photo +')'}:''"
                             @click="signOut" title="Sign out"></button>
 
@@ -19,15 +19,15 @@
         <div class="lobby-list">
             <div class="lobby-list-item" v-for="lobby in sortedLobbies" :key="lobby.id">
                 <span class="lobby-name">{{lobby.name}}</span>
-                <button class="btn copy-back" style="margin-left: auto" @click="copyLink(lobby.id)"></button>
+                <button class="btn copy-back" style="margin-left: auto" @click="copyLink(lobby.id)" title="Copy link to lobby."></button>
                 <template v-if="!lobby.isConnected">
-                    <button class="btn green-back" @click="connect(lobby.id)">Connect</button>
-                    <button class="btn red-back" @click="remove(lobby.id)">Remove</button>
+                    <button class="btn green-back" @click="connect(lobby.id)" title="Connect to lobby.">Connect</button>
+                    <button class="btn red-back" @click="remove(lobby.id)" title="Remove lobby.">Remove</button>
                 </template>
                 <template v-else>
-                    <button v-if="!lobby.isSynced" class="btn blue-back" @click="sync(lobby.id)">Sync</button>
-                    <button v-else class="btn blue-back" @click="unsync(lobby.id)">Unsync</button>
-                    <button class="btn red-back" @click="disconnect(lobby.id)">Disconnect</button>
+                    <button v-if="!lobby.isSynced" class="btn blue-back" @click="sync(lobby.id)" title="Sync video with lobby.">Sync</button>
+                    <button v-else class="btn blue-back" @click="unsync(lobby.id)" title="Unsync video.">Unsync</button>
+                    <button class="btn red-back" @click="disconnect(lobby.id)" title="Disconnect from lobby.">Disconnect</button>
                 </template>
             </div>
         </div>
@@ -303,4 +303,8 @@
         background-color: #727272;
     }
 
+    .logout-btn:hover {
+        background: url(../assets/logout.svg) no-repeat center;
+        background-size: 22px 22px;
+    }
 </style>
