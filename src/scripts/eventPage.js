@@ -149,12 +149,12 @@ if (location.pathname.match(/\/auth\.html.*/)) {
             videoControllersRef.
                 update({numOfUsers: numOfUsers.val() - 1});
             browser.storage.sync.get('lobbiesHistory', objWithHistory => {
-              objWithHistory.lobbiesHistory[currentLobbyId].sync = false;
+              delete objWithHistory.lobbiesHistory[currentLobbyId].tabId;
               browser.storage.sync.set(objWithHistory);
             });
           });
     });
-    port.onMessage.addListener(message => {
+    port.onMessage.addListener((message, sender) => {
       switch (message.type) {
         case SYNC_LOBBY: {
           currentLobbyId = message.payload.lobbyId;
@@ -199,7 +199,8 @@ if (location.pathname.match(/\/auth\.html.*/)) {
                 videoControllersRef.child('numOfUsers').
                     set(numOfUsers.val() + 1);
                 browser.storage.sync.get('lobbiesHistory', objWithHistory => {
-                  objWithHistory.lobbiesHistory[message.payload.lobbyId].sync = true;
+                  objWithHistory.lobbiesHistory[message.payload.lobbyId].tabId = sender.sender.tab.id;
+                  console.log(objWithHistory.lobbiesHistory[message.payload.lobbyId].tabId);
                   browser.storage.sync.set(objWithHistory);
                 });
               });
