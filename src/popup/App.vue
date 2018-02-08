@@ -16,19 +16,20 @@
                 </div>
             </template>
         </header>
-
-        <div class="lobby-list-item" v-for="lobby in sortedLobbies" :key="lobby.id">
-            <span class="lobby-name">{{lobby.name}}</span>
-            <button class="btn copy-back" style="margin-left: auto" @click="copyLink(lobby.id)"></button>
-            <template v-if="!lobby.isConnected">
-                <button class="btn green-back" @click="connect(lobby.id)">Connect</button>
-                <button class="btn red-back" @click="remove(lobby.id)">Remove</button>
-            </template>
-            <template v-else>
-                <button v-if="!lobby.isSynced" class="btn blue-back" @click="sync(lobby.id)">Sync</button>
-                <button v-else class="btn blue-back" @click="unsync(lobby.id)">Unsync</button>
-                <button class="btn red-back" @click="disconnect(lobby.id)">Disconnect</button>
-            </template>
+        <div class="lobby-list">
+            <div class="lobby-list-item" v-for="lobby in sortedLobbies" :key="lobby.id">
+                <span class="lobby-name">{{lobby.name}}</span>
+                <button class="btn copy-back" style="margin-left: auto" @click="copyLink(lobby.id)"></button>
+                <template v-if="!lobby.isConnected">
+                    <button class="btn green-back" @click="connect(lobby.id)">Connect</button>
+                    <button class="btn red-back" @click="remove(lobby.id)">Remove</button>
+                </template>
+                <template v-else>
+                    <button v-if="!lobby.isSynced" class="btn blue-back" @click="sync(lobby.id)">Sync</button>
+                    <button v-else class="btn blue-back" @click="unsync(lobby.id)">Unsync</button>
+                    <button class="btn red-back" @click="disconnect(lobby.id)">Disconnect</button>
+                </template>
+            </div>
         </div>
     </div>
 </template>
@@ -213,7 +214,7 @@
         margin: 5px 9px 5px;
         font-size: unset;
         width: 120px;
-        height: 30px;
+        height: 26px;
         text-overflow: ellipsis;
     }
 
@@ -284,4 +285,22 @@
         font-size: 23px;
         color: white;
     }
+
+    .lobby-list {
+        overflow: auto;
+        overflow-x:hidden;
+        height: 100%;
+        width: 100%;
+    }
+
+    .lobby-list::-webkit-scrollbar {
+        width: 3px;
+        background-color: rgba(162, 226, 226, 0);
+    }
+
+    .lobby-list::-webkit-scrollbar-thumb {
+        border-radius: 5px;
+        background-color: #727272;
+    }
+
 </style>
