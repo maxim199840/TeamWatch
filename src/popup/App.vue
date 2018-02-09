@@ -5,11 +5,14 @@
             <p class="project-name">Team Watch</p>
             <div class="right-bar">
                 <template v-if="!user">
-                    <button class="round-btn user-back" @click="signIn"></button>
+                    <button class="round-btn user-back signin-onhover-back"
+                            @click="signIn" title="Sign in"></button>
                 </template>
                 <template v-else>
-                    <button class="round-btn add-back" @click="create" title="Create new lobby."></button>
-                    <button class="round-btn user-back logout-back"
+                    <button class="round-btn add-back" @click="create" title="Create lobby"></button>
+                    <button class="round-btn user-back signout-onhover-back"
+                            :style="authButtonHovered?{}:{backgroundImage:'url('+user.photo+')'}"
+                            @mouseenter="authButtonHovered=true" @mouseleave="authButtonHovered=false"
                             @click="signOut" title="Sign out"></button>
                 </template>
             </div>
@@ -54,6 +57,7 @@
     name: 'app',
     data() {
       return {
+        authButtonHovered: false,
         user: null,
         lobbiesHistory: {},
         currentTabId: null,
@@ -262,8 +266,8 @@
     }
 
     .user-back {
-        background: center url(../assets/user.svg);
-        background-size: 26px 26px;
+        background: url(../assets/user.svg) no-repeat center;
+        background-size: 100% 100%;
         border-color: white;
     }
 
@@ -302,9 +306,12 @@
         background-color: #727272;
     }
 
-    .logout-back:hover {
-        background: url(../assets/logout.svg) no-repeat center;
-        background-size: 90% 90%;
+    .signin-onhover-back:hover {
+
+    }
+
+    .signout-onhover-back:hover {
+        background-image: url(../assets/logout.svg);
         border-color: transparent;
     }
 </style>
