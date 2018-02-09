@@ -23,6 +23,7 @@
         </div>
         <div v-else class="lobby-list content-container">
             <div class="lobby-list-item" v-for="lobby in sortedLobbies" :key="lobby.id">
+                <div v-if="lobby.tabId===currentTabId" class="marker"></div>
                 <span class="lobby-name">{{lobby.name}}</span>
                 <button class="btn copy-btn" style="margin-left: auto" @click="copyLink(lobby.id)"
                         title="Copy link to lobby"></button>
@@ -350,5 +351,12 @@
         height: 26px;
         background: url(../assets/enter-arrow.svg) no-repeat center;
         background-size: 22px 22px;
+    }
+
+    .marker {
+        margin-right: -5px;
+        height: 100%;
+        width: 5px;
+        background-color: darkred;
     }
 </style>
