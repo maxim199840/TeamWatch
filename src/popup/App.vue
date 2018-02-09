@@ -21,19 +21,17 @@
             <div class="lobby-list-item" v-for="lobby in sortedLobbies" :key="lobby.id">
                 <span class="lobby-name">{{lobby.name}}</span>
                 <button class="btn copy-back" style="margin-left: auto" @click="copyLink(lobby.id)"
-                        title="Copy link to lobby."></button>
+                        title="Copy link to lobby"></button>
                 <template v-if="!lobby.isConnected">
-                    <button class="btn green-back" @click="connect(lobby.id)" title="Connect to lobby.">Connect</button>
-                    <button class="btn red-back" @click="remove(lobby.id)" title="Remove lobby.">Remove</button>
+                    <button class="btn connect-btn" @click="connect(lobby.id)" title="Connect to lobby"></button>
+                    <button class="btn remove-btn" @click="remove(lobby.id)" title="Remove lobby"></button>
                 </template>
                 <template v-else>
-                    <button v-if="!lobby.isSynced" class="btn blue-back" @click="sync(lobby.id)"
-                            title="Sync video with lobby.">Sync
-                    </button>
-                    <button v-else class="btn blue-back" @click="unsync(lobby.id)" title="Unsync video.">Unsync</button>
-                    <button class="btn red-back" @click="disconnect(lobby.id)" title="Disconnect from lobby.">
-                        Disconnect
-                    </button>
+                    <button v-if="!lobby.isSynced" class="btn sync-btn" @click="sync(lobby.id)"
+                            title="Sync video with lobby"></button>
+                    <button v-else class="btn unsync-btn" @click="unsync(lobby.id)" title="Unsync video"></button>
+                    <button class="btn disconnect-btn" @click="disconnect(lobby.id)"
+                            title="Disconnect from lobby"></button>
                 </template>
             </div>
         </div>
@@ -216,7 +214,7 @@
         overflow: hidden;
         margin: 5px 9px 5px;
         font-size: unset;
-        width: 120px;
+        width: 200px;
         height: 26px;
         text-overflow: ellipsis;
         cursor: default;
@@ -230,18 +228,6 @@
         background: #ddd;
         border-radius: 4px;
         cursor: pointer;
-    }
-
-    .green-back {
-        background: #8e9;
-    }
-
-    .red-back {
-        background: #e98;
-    }
-
-    .blue-back {
-        background: #9ce;
     }
 
     .copy-back {
@@ -313,5 +299,45 @@
     .signout-onhover-back:hover {
         background-image: url(../assets/logout.svg);
         border-color: transparent;
+    }
+
+    .sync-btn {
+        width: 26px;
+        height: 26px;
+        background: url(../assets/synchronization.svg) no-repeat center;
+        background-size: 20px 20px;
+    }
+
+    .unsync-btn {
+        width: 26px;
+        height: 26px;
+        background: url(../assets/turn-synchronization-off.svg) no-repeat center;
+        background-size: 20px 20px;
+    }
+
+    .disconnect-btn {
+        width: 26px;
+        height: 26px;
+        background: url(../assets/disconnect.svg) no-repeat center;
+        background-size: 22px 22px;
+    }
+
+    .remove-btn {
+        width: 26px;
+        height: 26px;
+        background: url(../assets/trash-can-with-cover.svg) no-repeat center;
+        background-size: 20px 20px;
+    }
+
+    .remove-btn:hover {
+        background: url(../assets/open-trash-can.svg) no-repeat center;
+        background-size: 22px 22px;
+    }
+
+    .connect-btn {
+        width: 26px;
+        height: 26px;
+        background: url(../assets/enter-arrow.svg) no-repeat center;
+        background-size: 22px 22px;
     }
 </style>

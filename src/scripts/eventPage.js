@@ -128,12 +128,12 @@ if (location.pathname.match(/\/auth\.html.*/)) {
   browser.runtime.onConnect.addListener(port => {
     let currentLobbyId = null, videoControllersRef,
         videoState = {isPlaying: false, time: 0};
+    let currentIsPlaying;
     port.onDisconnect.addListener(() => {
-
       videoControllersRef.child('numOfUsers').
           once('value').
           then(numOfUsers => {
-            if (numOfUsers.val() === 1) {
+            if (numOfUsers.val() === 1 && currentIsPlaying) {
               videoControllersRef.
                   once('value').
                   then(lobbyInfo => {
@@ -163,7 +163,6 @@ if (location.pathname.match(/\/auth\.html.*/)) {
           videoControllersRef.child('numOfUsers').
               once('value').
               then(numOfUsers => {
-                let currentIsPlaying;
                 videoControllersRef.child('isPlaying').
                     on('value', isPlaying => {
                       currentIsPlaying = isPlaying.val();
@@ -200,7 +199,8 @@ if (location.pathname.match(/\/auth\.html.*/)) {
                     set(numOfUsers.val() + 1);
                 browser.storage.sync.get('lobbiesHistory', objWithHistory => {
                   objWithHistory.lobbiesHistory[message.payload.lobbyId].tabId = sender.sender.tab.id;
-                  console.log(objWithHistory.lobbiesHistory[message.payload.lobbyId].tabId);
+                  console.log(
+                      objWithHistory.lobbiesHistory[message.payload.lobbyId].tabId);
                   browser.storage.sync.set(objWithHistory);
                 });
               });
@@ -294,7 +294,21 @@ if (location.pathname.match(/\/auth\.html.*/)) {
                   objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity.link = generateLink(
                       videoIdentity.val());
                   console.log(objWithHistory);
-                  browser.storage.sync.set(objWithHistory);
+                  browser.storage.sync.set(objWithHistory, () => {
+                    browser.tabs.query({active: true},
+                        ([tab]) => {
+                          browser.tabs.sendMessage(
+                              tab.id,
+                              {
+                                type: SYNC_LOBBY,
+                                payload: {
+                                  lobbyId: message.payload.lobbyId,
+                                  videoIdentity: objWithHistory.lobbiesHistory[message.payload.lobbyId].videoIdentity,
+                                },
+                              },
+                          );
+                        });
+                  });
                 });
 
           });
