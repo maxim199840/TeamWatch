@@ -18,8 +18,9 @@
         </header>
         <div v-if="!user" id="auth" class="content-container">
         </div>
-        <div v-else-if="!sortedLobbies.length" class="content-container">
-            Create lobby
+        <div v-else-if="!sortedLobbies.length" class="content-container placeholder">
+            <img src="../assets/history.svg" class="history-img">
+            <h3>No lobbies in history</h3>
         </div>
         <div v-else class="lobby-list content-container">
             <div class="lobby-list-item" v-for="lobby in sortedLobbies" :key="lobby.id">
@@ -194,7 +195,7 @@
     .dashboard {
         display: flex;
         margin-top: 3px;
-        background-color: #2c3e50;
+        background-color: #556180;
         height: 40px;
         box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
         flex-direction: row;
@@ -358,5 +359,20 @@
         height: 100%;
         width: 5px;
         background-color: darkred;
+    }
+
+    .history-img {
+        height: 100px;
+        width: 100px;
+        margin-top: 20px;
+    }
+
+    .placeholder {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: grey;
     }
 </style>
