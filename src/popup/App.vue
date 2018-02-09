@@ -5,12 +5,12 @@
             <p class="project-name">Team Watch</p>
             <div class="right-bar">
                 <template v-if="!user">
-                    <button class="round-btn user-back signin-onhover-back"
+                    <button class="round-btn user-btn signin-btn"
                             @click="signIn" title="Sign in"></button>
                 </template>
                 <template v-else>
-                    <button class="round-btn add-back" @click="create" title="Create lobby"></button>
-                    <button class="round-btn user-back signout-onhover-back"
+                    <button class="round-btn add-btn" @click="create" title="Create lobby"></button>
+                    <button class="round-btn user-btn signout-btn"
                             :style="authButtonHovered?{}:{backgroundImage:'url('+user.photo+')'}"
                             @mouseenter="authButtonHovered=true" @mouseleave="authButtonHovered=false"
                             @click="signOut" title="Sign out"></button>
@@ -20,7 +20,7 @@
         <div class="lobby-list">
             <div class="lobby-list-item" v-for="lobby in sortedLobbies" :key="lobby.id">
                 <span class="lobby-name">{{lobby.name}}</span>
-                <button class="btn copy-back" style="margin-left: auto" @click="copyLink(lobby.id)"
+                <button class="btn copy-btn" style="margin-left: auto" @click="copyLink(lobby.id)"
                         title="Copy link to lobby"></button>
                 <template v-if="!lobby.isConnected">
                     <button class="btn connect-btn" @click="connect(lobby.id)" title="Connect to lobby"></button>
@@ -206,8 +206,8 @@
     }
 
     .lobby-list-item:hover {
-        background: #f8f8f8;
-        box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.14), 0 0 6px 4px rgba(0, 0, 0, 0.13);
+        background: #fafafa;
+        box-shadow: 0 0 5px 2px rgba(44, 62, 80, 0.2), 0 0 12px 4px rgba(44, 62, 80, 0.19);
     }
 
     .lobby-name {
@@ -230,7 +230,7 @@
         cursor: pointer;
     }
 
-    .copy-back {
+    .copy-btn {
         width: 26px;
         background: url(../assets/share.svg) no-repeat center;
         background-size: 22px 22px;
@@ -251,13 +251,13 @@
         cursor: pointer;
     }
 
-    .user-back {
+    .user-btn {
         background: url(../assets/user.svg) no-repeat center;
         background-size: 100% 100%;
         border-color: white;
     }
 
-    .add-back {
+    .add-btn {
         background: url(../assets/add.svg) no-repeat center;
         background-size: 90% 90%;
     }
@@ -292,12 +292,13 @@
         background-color: #727272;
     }
 
-    .signin-onhover-back:hover {
-
+    .signin-btn:hover {
+        background-image: url(../assets/sign-in.svg);
+        border-color: transparent;
     }
 
-    .signout-onhover-back:hover {
-        background-image: url(../assets/logout.svg);
+    .signout-btn:hover {
+        background-image: url(../assets/sign-out.svg);
         border-color: transparent;
     }
 
