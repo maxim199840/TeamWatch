@@ -5,8 +5,7 @@
             <p class="project-name">Team Watch</p>
             <div class="right-bar">
                 <template v-if="!user">
-                    <button class="round-btn user-btn signin-btn"
-                            @click="signIn" title="Sign in"></button>
+                    <button class="round-btn user-btn signin-btn" @click="signIn" title="Sign in"></button>
                 </template>
                 <template v-else>
                     <button class="round-btn add-btn" @click="create" title="Create lobby"></button>
@@ -17,7 +16,12 @@
                 </template>
             </div>
         </header>
-        <div class="lobby-list">
+        <div v-if="!user" id="auth" class="content-container">
+        </div>
+        <div v-else-if="!sortedLobbies.length" class="content-container">
+            Create lobby
+        </div>
+        <div v-else class="lobby-list content-container">
             <div class="lobby-list-item" v-for="lobby in sortedLobbies" :key="lobby.id">
                 <span class="lobby-name">{{lobby.name}}</span>
                 <button class="btn copy-btn" style="margin-left: auto" @click="copyLink(lobby.id)"
@@ -183,8 +187,7 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         color: #2c3e50;
-        width: 320px;
-        height: 360px;
+        width: 300px;
     }
 
     .dashboard {
@@ -194,6 +197,11 @@
         height: 40px;
         box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
         flex-direction: row;
+    }
+
+    .content-container {
+        width: 100%;
+        height: 340px;
     }
 
     .lobby-list-item {
@@ -278,7 +286,7 @@
     .lobby-list {
         overflow: auto;
         overflow-x: hidden;
-        height: 100%;
+        height: 360px;
         width: 100%;
     }
 
@@ -294,11 +302,13 @@
 
     .signin-btn:hover {
         background-image: url(../assets/sign-in.svg);
+        background-size: 95%;
         border-color: transparent;
     }
 
     .signout-btn:hover {
         background-image: url(../assets/sign-out.svg);
+        background-size: 95%;
         border-color: transparent;
     }
 
