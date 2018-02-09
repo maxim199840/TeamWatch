@@ -4,10 +4,7 @@
             <img class="project-icon" src="../assets/video-camera.svg"/>
             <p class="project-name">Team Watch</p>
             <div class="right-bar">
-                <template v-if="!user">
-                    <button class="round-btn user-btn signin-btn" @click="signIn" title="Sign in"></button>
-                </template>
-                <template v-else>
+                <template v-if="user">
                     <button class="round-btn add-btn" @click="create" title="Create lobby"></button>
                     <button class="round-btn user-btn signout-btn"
                             :style="authButtonHovered?{}:{backgroundImage:'url('+user.photo+')'}"
@@ -16,10 +13,12 @@
                 </template>
             </div>
         </header>
-        <div v-if="!user" id="auth" class="content-container">
+        <div v-if="!user" id="auth" class="content-container placeholder">
+            <div class="placeholder-sign-in-image" @click="signIn"></div>
+            <h2>Sign in</h2>
         </div>
         <div v-else-if="!sortedLobbies.length" class="content-container placeholder">
-            <img src="../assets/history.svg" class="history-img">
+            <div class="placeholder-no-lobbies-image"></div>
             <h3>No lobbies in history</h3>
         </div>
         <div v-else class="lobby-list content-container">
@@ -189,7 +188,7 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         color: #2c3e50;
-        width: 300px;
+        width: 320px;
     }
 
     .dashboard {
@@ -203,7 +202,7 @@
 
     .content-container {
         width: 100%;
-        height: 340px;
+        height: 320px;
     }
 
     .lobby-list-item {
@@ -302,12 +301,6 @@
         background-color: #727272;
     }
 
-    .signin-btn:hover {
-        background-image: url(../assets/sign-in.svg);
-        background-size: 95%;
-        border-color: transparent;
-    }
-
     .signout-btn:hover {
         background-image: url(../assets/sign-out.svg);
         background-size: 95%;
@@ -361,12 +354,6 @@
         background-color: darkred;
     }
 
-    .history-img {
-        height: 100px;
-        width: 100px;
-        margin-top: 20px;
-    }
-
     .placeholder {
         display: flex;
         flex-direction: column;
@@ -374,5 +361,24 @@
         align-items: center;
         text-align: center;
         color: grey;
+    }
+
+    .placeholder-sign-in-image {
+        width: 80px;
+        height: 80px;
+        background: url(../assets/sign-in-placeholder.svg) center no-repeat;
+        background-size: 100%;
+        cursor: pointer;
+    }
+
+    .placeholder-sign-in-image:hover {
+        background-size: 97%;
+    }
+
+    .placeholder-no-lobbies-image {
+        width: 80px;
+        height: 80px;
+        background: url(../assets/history.svg) center no-repeat;
+        background-size: 100%;
     }
 </style>
