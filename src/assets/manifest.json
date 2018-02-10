@@ -1,10 +1,12 @@
 {
   "name": "Team Watch",
   "manifest_version": 2,
-  "version": "0.3.0",
-  "icons": { "16": "video-camera16.png",
+  "version": "1.0.0",
+  "icons": {
+    "16": "video-camera16.png",
     "48": "video-camera64.png",
-    "128": "video-camera128.png" },
+    "128": "video-camera128.png"
+  },
   "background": {
     "scripts": [
       "eventPage.js"

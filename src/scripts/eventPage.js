@@ -98,9 +98,9 @@ if (location.pathname.match(/\/auth\.html.*/)) {
     if (user) {
       userId = user.uid;
       db.ref(`users/${userId}/lobbies`).once('value').then(lobbiesHistory => {
-        let userLobbiesHistory = lobbiesHistory.val() ?
-            lobbiesHistory.val() :
-            {};
+        let userLobbiesHistory = lobbiesHistory.val()
+            ? lobbiesHistory.val()
+            : {};
         browser.storage.sync.set({lobbiesHistory: userLobbiesHistory});
       });
     } else browser.storage.sync.set({lobbiesHistory: {}});
