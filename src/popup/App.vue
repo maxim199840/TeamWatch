@@ -122,7 +122,7 @@
         });
       },
       copyLink(lobbyId) {
-        copy(`team.watch/${lobbyId}`);
+        copy(`https://teamwatch-d4d79.firebaseapp.com/${lobbyId}`);
       },
       connect(lobbyId) {
         browser.runtime.sendMessage({

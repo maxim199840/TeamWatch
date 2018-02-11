@@ -341,11 +341,9 @@ if (location.pathname.match(/\/auth\.html.*/)) {
   });
 
   function addLobbyToHistory(tab) {
-    if (tab.url.match('chrome-extension://')) return;
     let currentURL = new URL(tab.url);
-    if (currentURL.hostname === 'team.watch') {
-      browser.tabs.update(
-          {url: './loading.html'});
+    if (currentURL.origin === 'https://teamwatch-d4d79.firebaseapp.com') {
+      browser.tabs.update({url: './loading.html'});
       let lobbyId = currentURL.pathname.slice(1);
       db.ref(`lobbies/${lobbyId}`).
           once('value').
