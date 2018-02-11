@@ -13,8 +13,6 @@ import {
 
 if (location.pathname.match(/\/auth\.html.*/)) {
 
-  console.log(window, location);
-
   new firebaseui.auth.AuthUI(auth).start('#auth', {
     callbacks: {
       signInSuccess: function(user, credential) {
@@ -342,7 +340,8 @@ if (location.pathname.match(/\/auth\.html.*/)) {
 
   function addLobbyToHistory(tab) {
     let currentURL = new URL(tab.url);
-    if (currentURL.origin === 'https://teamwatch-d4d79.firebaseapp.com') {
+    if (currentURL.origin === 'https://teamwatch-d4d79.firebaseapp.com'
+        && currentURL.pathname !== '/__/auth/handler') {
       browser.tabs.update({url: './loading.html'});
       let lobbyId = currentURL.pathname.slice(1);
       db.ref(`lobbies/${lobbyId}`).
